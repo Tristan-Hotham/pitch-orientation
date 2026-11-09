@@ -1,0 +1,18 @@
+{
+  "title": "Which way do cricket pitches face?",
+  "slug": "pitch-orientation",
+  "excerpt": "The old advice says a cricket pitch should run north to south, out of the evening sun. I measured every cricket pitch in OpenStreetMap and every sports pitch in the UK: 55% of cricket strips follow the rule, tennis courts mostly do, and football pitches point anywhere.",
+  "seo_description": "55% of the world's mapped cricket strips run north to south. Tennis follows the rule; football ignores it.",
+  "tags": [
+    "maps",
+    "data visualisation",
+    "cricket",
+    "tennis",
+    "football",
+    "OpenStreetMap",
+    "sun",
+    "sport",
+    "geography"
+  ],
+  "header_alt": "Title card reading 'Which way do cricket pitches face?' on parchment beside a large rose diagram of cricket strips standing upright on the north to south line, with the line '55% lie within 20° of N to S'."
+}

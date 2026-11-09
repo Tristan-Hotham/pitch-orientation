@@ -1,0 +1,134 @@
+<!-- wp:paragraph -->
+<p><em>The usual advice is to lay a cricket pitch north to south, or the evening sun will dazzle the batter. I measured every cricket pitch in OpenStreetMap, and every sports pitch in the UK, to see who follows it. Cricket does. Tennis does. Football does not care.</em></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:buttons -->
+<div class="wp-block-buttons"><!-- wp:button -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="https://maps.tristanhotham.com/pitch-orientation/">Explore the interactive version</a></div>
+<!-- /wp:button -->
+<!-- wp:button -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="https://doi.org/10.5281/zenodo.24075295">Read the paper</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons -->
+
+<!-- wp:paragraph -->
+<p>Cricket is a game of long summer evenings, and long summer evenings end with the sun low in the west. Stand at the crease of a pitch that runs east to west and, for an hour or two, the bowler comes at you out of the glare. So design guides advise running the pitch roughly north to south; the Western Australian government's sports dimensions guide, for one, says so for cricket pitches and tennis courts alike. FIFA's stadium guidelines say big football stadiums mostly run north to south too, but the ordinary park pitch gets little advice.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>OpenStreetMap makes the rule testable. Volunteers have traced 15,168 cricket pitches around the world and 84,853 sports pitches of every kind in the UK. For each one I found the smallest rectangle that fits round its outline and measured how far its long side turns from the north to south line.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Three things called a pitch</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The first job was to work out what a "cricket pitch" on the map actually is. Mappers use the word for three different things. The strip is the 22 yards between the wickets, a thin rectangle about 25.9 m by 2.9 m as mapped, and its long side is the line of play. The square is the block of a dozen strips side by side in the middle of a club ground, and its strips could run either way across it. The ground is the whole field, usually round, with no direction at all. I sorted them by size and shape: 1,394 strips, 1,117 squares, 9,980 grounds. Then I looked at the strips, drawn with the roads and buildings around them, and found that about one in twelve were really banks of practice nets at the edge of a ground, which I moved to their own pile.</p>
+<!-- /wp:paragraph -->
+
+{{IMG|b_shapes.png|Three outlines side by side: a thin cricket strip about 27 by 3 metres with its long axis drawn in red, a nearly square block of turf, and a round cricket ground with a dashed rectangle around it|A strip, a square and a ground. Only the strip has an axis that is the pitch.}}
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The rule holds</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Of the 1,394 strips, 55% lie within 20 degrees of north to south. If pitches pointed at random, only 22% would. Just 10% run within 20 degrees of east to west, the direction the advice exists to avoid. In Australia, the country with the most mapped strips, the share is 69%. In the UK it is 47%, and in New Zealand only 34%.</p>
+<!-- /wp:paragraph -->
+
+{{IMG|b_map.png|Three maps on parchment, of Britain, south-east Australia and New Zealand, with every cricket strip as a short coloured line. Most Australian lines are red and upright; most British lines too, with some blue ones lying across; New Zealand's point more ways|Every mapped strip in the three countries with the most, tinted by how far it turns from north to south.}}
+
+<!-- wp:paragraph -->
+<p>British mappers rarely draw single strips, but they often draw the square, and the squares agree. A square is usually wider across its strips than along them, and 32% of the 578 UK squares have their long side running east to west, against 17% running north to south. A row of strips side by side across an east to west block is a row of strips running north to south.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Tennis yes, football no</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Tennis is the only other sport that keeps the rule. Of 29,426 UK tennis courts, 40% lie within 20 degrees of north to south and only 12% within 20 degrees of east to west. Football is a different story: 26% of 23,114 pitches run north to south and 25% east to west. Rugby is the same. These pitches follow the shape of the field they were squeezed into, and a rectangular field is as likely to lie one way as the other.</p>
+<!-- /wp:paragraph -->
+
+{{IMG|b_sports.png|Horizontal bar chart of UK sports: cricket strips 47 percent within 20 degrees of north to south, tennis 40, netball 30, hockey 28, basketball 27, football 26, rugby 25, Gaelic games 24, against 22 percent by chance|Share of UK pitches within 20° (dark) and 30° (pale) of north to south, by sport.}}
+
+{{IMG|b_roses.png|Five rose diagrams. UK and Australian cricket strips and UK tennis courts form narrow upright bow ties; UK football pitches form a cross, as many east to west as north to south; UK cricket squares lean east to west|The direction of every pitch, drawn as a rose.}}
+
+<!-- wp:pullquote -->
+<figure class="wp-block-pullquote"><blockquote><p>55% of the world's cricket strips run within 20 degrees of north to south. Chance would give 22%.</p></blockquote></figure>
+<!-- /wp:pullquote -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">How much does the sun matter?</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>To see what the rule protects against, I modelled the sun: for each latitude and pitch direction, the minutes in a season when the sun is less than 15 degrees high and within 15 degrees of the line of the pitch, from ten in the morning until sunset. In an English season, a pitch running east to west gets about 88 hours of that low sun down its length. A north to south pitch gets none. But so does anything from -33 to 61 degrees from north: the safe arc is wide, and it leans towards the north-east, because the midsummer evening sun sets in the north-west. The rule as builders keep it is stricter than the sun demands.</p>
+<!-- /wp:paragraph -->
+
+{{IMG|b_glare.png|Line chart of hours of low sun along a pitch by its direction, zero for north to south pitches and peaking for east-south-east pitches in England and east-north-east pitches in Sydney and Mumbai; beside it a shaded band of glare-free directions by latitude with red dots for the average strip|The glare model: hours of low sun along the pitch per season, and the band of safe directions by latitude.}}
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The street wins, except for cricket</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>For every strip and square, and thousands of other pitches, I read the roads within 200 m from OpenFreeMap's vector tiles and found the main direction of the local street grid. In built-up places where the grid runs well off the compass, most pitches simply line up with the streets: 85% of football pitches, 80% of tennis courts, 90% of rugby pitches. Cricket strips do so least often, 66%, and in Australia only 53%. Of the sports I measured, cricket is the least likely to follow the streets, which fits a game that tries to keep the sun out of the batter's eyes.</p>
+<!-- /wp:paragraph -->
+
+{{IMG|b_streets.png|Three histograms for pitches in towns: football pitches and tennis courts pile up near zero degrees from the street grid, while cricket strips are spread more evenly|In towns with an off-compass grid: angle to the street grid (bars) and to the compass (line).}}
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">What the map cannot say</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>OpenStreetMap is uneven. Strips are mapped mostly in Australia, New Zealand and Britain, and hardly at all in India, Pakistan, Sri Lanka, Bangladesh or the Caribbean, where most of the world's cricket is played, and the great Test grounds are usually mapped as stadiums rather than pitches. So the comparison between hemispheres and latitudes rests on a few countries. My size rules will let the odd single-lane net through as a strip. And the sun model is a sketch: it ignores trees, stands, cloud and the real hours of matches.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">How I did this</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The pitch outlines come from OpenStreetMap, extracted with the QLever query engine. Each outline was laid flat around its own centre with north kept true, and the long side of the smallest rectangle that fits round it gives its direction. Pitches of other sports were kept only when the rectangle has the size and shape of one playing area, so that rows of tennis courts side by side, whose long side runs across the courts, are left out. The street grid comes from OpenFreeMap's vector tiles. The sun's position uses Spencer's 1971 formula and Bennett's refraction. All the code and data are on GitHub, and the map lets you look at any pitch you like.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:buttons -->
+<div class="wp-block-buttons"><!-- wp:button -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="https://maps.tristanhotham.com/pitch-orientation/">Explore the interactive version</a></div>
+<!-- /wp:button -->
+<!-- wp:button -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="https://doi.org/10.5281/zenodo.24075295">Read the paper</a></div>
+<!-- /wp:button -->
+<!-- wp:button -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="https://github.com/Tristan-Hotham/pitch-orientation">Data and code</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Notes and sources</h3>
+<!-- /wp:heading -->
+
+<!-- wp:list -->
+<ul><!-- wp:list-item -->
+<li>Pitch outlines: © OpenStreetMap contributors, Open Database Licence, queried with QLever (Bast and Buchhold 2017) over osm2rdf.</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>Street grid: OpenFreeMap vector tiles (OpenMapTiles schema, OpenStreetMap data). Country outlines: Natural Earth.</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>Sun: Spencer, J. W. (1971) Fourier series representation of the position of the sun, Search 2(5); Bennett, G. G. (1982) The calculation of astronomical refraction in marine navigation, Journal of Navigation 35(2).</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>Minimum-area rectangle: Freeman, H. and Shapira, R. (1975), Communications of the ACM 18(7). The method follows my study of which way the UK's churches face.</li>
+<li>Design guidance: Government of Western Australia (2025) Sports dimensions guide (cricket pitches and tennis courts approximately north to south); FIFA (2022) FIFA Stadium Guidelines, section 2.2, Orientation.</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>Paper: Hotham, T. (2026) Which way do cricket pitches face? Zenodo, 10.5281/zenodo.24075295.</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>I wrote the text, with drafting and editing assistance from Claude (Anthropic), which also helped prepare the analysis code. I reviewed and checked all text and results.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
