@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Which way do cricket pitches face?</title>
+<meta name="description" content="1,394 cricket strips and 61,215 other pitches from OpenStreetMap, measured: do they follow the old advice to run north to south, out of the low sun?">
+<meta property="og:title" content="Which way do cricket pitches face?">
+<meta property="og:description" content="47% of UK cricket strips run within 20° of north to south, against 26% of football pitches. Every pitch measured, on a hand-inked map.">
+<meta property="og:image" content="https://maps.tristanhotham.com/pitch-orientation/header.png">
+<meta property="og:url" content="https://maps.tristanhotham.com/pitch-orientation/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800;9..144,900&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=MedievalSharp&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<style>
+:root{
+  --bg:#F6EED8; --panel:#EFE3C4; --fg:#2B2119; --muted:#6E604E; --rule:#E2D3AE; --card:#FBF5E4; --border:#D3C29A;
+  --hot:#A3261B; --cool:#3D6E9E;
+  --display:"Fraunces",Georgia,"Times New Roman",serif;
+  --body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --hand:"MedievalSharp","Fraunces",Georgia,serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1A1612; --panel:#241E18; --fg:#EFE6D4; --muted:#ADA08B; --rule:#3A3128; --card:#211B15; --border:#4D4234; --hot:#E07A6C; --cool:#8FB4DA; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1A1612; --panel:#241E18; --fg:#EFE6D4; --muted:#ADA08B; --rule:#3A3128; --card:#211B15; --border:#4D4234; --hot:#E07A6C; --cool:#8FB4DA; color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 18px/1.62 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));overflow-x:hidden}
+.wrap{max-width:720px;margin:0 auto;padding-block:28px 64px}
+a{color:inherit;text-decoration-color:var(--hot);text-underline-offset:3px}
+.kicker{font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.kicker b{background:#A3261B;color:#fff;padding:5px 8px;font-weight:500}
+.byline{font:400 13px/1.4 var(--mono);color:var(--muted);margin-top:14px}
+h2{font:800 34px/1.04 var(--display);letter-spacing:-.01em;margin:54px 0 10px;text-wrap:balance}
+h2 .n{font:500 13px/1 var(--mono);color:var(--hot);display:block;letter-spacing:.1em;margin-bottom:10px}
+p{margin:0 0 16px}
+.lede::first-letter{font:400 76px/.8 var(--hand);float:left;margin:6px 10px 0 0;color:var(--hot)}
+.src{font:400 12px/1.45 var(--mono);color:var(--muted);margin-top:10px}
+ul.plain{padding-left:20px} ul.plain li{margin:4px 0}
+details{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:10px 0;margin:18px 0;font-size:16px}
+summary{font:500 13px/1.4 var(--mono);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;color:var(--muted)}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin:30px 0 0}
+.cta a{font:500 13px/1 var(--mono);text-decoration:none;border:1px solid var(--fg);padding:11px 14px;border-radius:3px}
+.cta a.p{background:#A3261B;border-color:#A3261B;color:#fff}
+footer{border-top:6px double var(--fg);margin-top:56px;padding-top:16px;font:400 13px/1.55 var(--mono);color:var(--muted)}
+footer p{margin:0 0 10px}
+.theme{font:500 12px/1 var(--mono);background:var(--card);color:var(--fg);border:1px solid var(--border);border-radius:3px;padding:4px 8px;cursor:pointer;min-height:28px}
+.figure{margin:22px 0}
+.figure img{width:100%;height:auto;display:block;border:1px solid var(--border)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:22px 0}
+.stat{border:1px solid var(--border);background:var(--card);padding:10px 12px}
+.stat b{display:block;font:800 30px/1 var(--display);color:var(--hot)}
+.stat span{font:400 12.5px/1.35 var(--mono);color:var(--muted)}
+table.words{border-collapse:collapse;width:100%;font:400 13px/1.35 var(--mono);margin:12px 0}
+table.words th,table.words td{border-bottom:1px solid var(--rule);padding:5px 6px;text-align:left;vertical-align:top}
+table.words th{font-weight:500;color:var(--muted)}
+table.words td.r,table.words th.r{text-align:right}
+.tw{overflow-x:auto}
+
+/* ---- the map ---- */
+.topbar{height:40px;display:flex;align-items:center;gap:14px;margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:0 max(14px,env(safe-area-inset-left,0px));border-bottom:3px double var(--fg);background:var(--bg);overflow:hidden;white-space:nowrap}
+.tb-name{font:400 19px/1 var(--hand);color:var(--hot);text-decoration:none;letter-spacing:.03em}
+.tb-k{font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.tb-links{margin-left:auto;display:flex;gap:16px;align-items:center;font:500 12px/1 var(--mono)}
+.tb-links a{text-decoration:none}.tb-links a:hover{text-decoration:underline}
+.mapband{width:100vw;margin-left:calc(50% - 50vw)}
+#map{position:relative;height:calc(100vh - 43px);height:calc(100svh - 43px);min-height:460px;border-bottom:1px solid #BCA676;background:#F3E5BF;overflow:hidden}
+#map::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;box-shadow:inset 0 0 90px rgba(120,84,30,.22), inset 0 0 18px rgba(120,84,30,.18)}
+.cartouche{position:absolute;left:14px;top:14px;z-index:5;max-width:min(340px,calc(100% - 28px));background:rgba(251,243,220,.95);color:#2B2119;border:2px solid #2B2119;outline:1px solid #2B2119;outline-offset:-6px;padding:10px 14px;box-shadow:0 3px 14px rgba(60,40,10,.22)}
+.cartouche::before,.cartouche::after{content:"";position:absolute;width:9px;height:9px;background:#A3261B;border:1px solid #2B2119;border-radius:50%}
+.cartouche::before{left:-6px;top:-6px}.cartouche::after{right:-6px;bottom:-6px}
+.cartouche h1{font:900 clamp(21px,2.2vw,28px)/1.02 var(--display);letter-spacing:-.015em;margin:6px 0 0;color:#2B2119}
+.cartouche h1 .a{color:#A3261B;font-family:var(--hand);font-weight:400;letter-spacing:.03em}
+.cartouche .dek{font-size:13.5px;line-height:1.36;margin:6px 0 0;color:#2B2119}
+.cartouche .byline{font:400 11px/1.35 var(--mono);color:#6E604E;margin-top:6px}
+.cartouche .kicker{color:#6E604E}
+.ct-fold{position:absolute;right:6px;top:5px;width:26px;height:26px;border:0;background:none;color:#A3261B;font:400 18px/1 var(--hand);cursor:pointer;padding:0}
+.ct-toggle{display:none;font:400 17px/1 var(--hand);color:#A3261B;background:none;border:0;padding:2px 0;cursor:pointer;min-height:30px}
+.cartouche.folded .ct-body,.cartouche.folded .ct-fold{display:none}.cartouche.folded .ct-toggle{display:block}.cartouche.folded{padding:4px 11px}
+.ov{position:absolute;z-index:5;font:400 13px/1.3 var(--mono);color:#2B2119}
+.ov-top{right:54px;top:10px;max-width:calc(100% - 430px);display:flex;flex-direction:column;gap:6px;align-items:flex-end;pointer-events:none}
+.ov-top>*{pointer-events:auto}
+.srch{position:relative;width:min(340px,100%)}
+.srch input{width:100%;font:400 15px/1 var(--mono);background:rgba(251,245,228,.96);color:#2B2119;border:1px solid #9C8656;border-radius:3px;padding:9px 10px;min-height:40px;box-shadow:0 1px 4px rgba(60,40,10,.18)}
+.srch input:focus-visible,.chip:focus-visible,.lp label:focus-within,.lp select:focus-visible{outline:2px solid #A3261B;outline-offset:2px}
+.sug{position:absolute;left:0;right:0;top:100%;margin:2px 0 0;padding:0;list-style:none;background:#FBF5E4;border:1px solid #9C8656;max-height:300px;overflow:auto;display:none;box-shadow:0 3px 10px rgba(60,40,10,.2);z-index:12}
+.sug li{padding:8px 10px;cursor:pointer;border-bottom:1px solid #E7D9B6}
+.sug li span{color:#7A6A52;font-size:12px}
+.sug li[aria-selected="true"],.sug li:hover{background:#EFE1BC}
+.chips{display:flex;gap:6px;overflow-x:auto;max-width:100%;scrollbar-width:none;padding-bottom:2px;justify-content:flex-end;flex-wrap:wrap}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;font:500 12px/1 var(--mono);background:rgba(251,245,228,.94);color:#2B2119;border:1px solid #9C8656;border-radius:999px;padding:7px 10px;cursor:pointer;min-height:32px;white-space:nowrap;box-shadow:0 1px 3px rgba(60,40,10,.14);display:inline-flex;align-items:center;gap:6px}
+.chip:hover{background:#EFE1BC}
+.chip.lyr{background:#2B2119;color:#F6EED8;border-color:#2B2119}
+.chip.on{background:#A3261B;color:#fff;border-color:#A3261B}
+.lp{position:absolute;right:54px;top:96px;z-index:9;background:rgba(251,245,228,.98);border:1px solid #9C8656;border-radius:4px;padding:10px 12px 8px;font:400 13px/1.3 var(--mono);color:#2B2119;box-shadow:0 3px 12px rgba(60,40,10,.25);display:none;width:280px;max-height:calc(100% - 110px);overflow:auto}
+.lp.open{display:block}
+.lp h4{margin:0 0 6px;font:500 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#7A6A52}
+.lp h5{margin:9px 0 1px;padding-top:7px;border-top:1px solid #E2D3AE;font:600 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#A3261B}
+.lp label{display:flex;gap:8px;align-items:center;padding:4px 0;cursor:pointer;min-height:30px}
+.lp input{accent-color:#A3261B;width:16px;height:16px;flex:none}
+.lp select{width:100%;font:400 13px/1 var(--mono);padding:6px;border:1px solid #9C8656;border-radius:3px;background:#fff;color:#2B2119;min-height:34px;margin:3px 0 6px}
+.lp .note{font-size:11.5px;color:#6E604E;margin:2px 0 4px}
+.lgd{position:absolute;left:12px;bottom:40px;z-index:4;background:rgba(251,245,228,.95);border:1px solid #9C8656;border-radius:3px;padding:8px 10px;font:400 11.5px/1.3 var(--mono);color:#2B2119;width:236px}
+.lgd b{font-weight:500}
+.lgd .bar{height:10px;margin:5px 0 2px;border:1px solid #2B2119}
+.lgd .ends{display:flex;justify-content:space-between;color:#6E604E;font-size:10.5px}
+.lgd .rw{display:flex;gap:10px;align-items:center;margin-top:6px}
+.lgd canvas{flex:none}
+.lgd .rs{color:#6E604E;font-size:11px;line-height:1.35}
+.lgd .rs b{color:#A3261B;font:800 19px/1 var(--display);display:block}
+.lgd-t{display:none;font:500 12px/1 var(--mono);background:rgba(251,245,228,.95);border:1px solid #9C8656;border-radius:3px;color:#2B2119;padding:6px 9px;cursor:pointer;min-height:30px}
+.ov-br{position:absolute;right:54px;bottom:12px;z-index:4;font:400 11px/1.2 var(--mono);color:#6E604E;background:rgba(251,245,228,.85);padding:5px 7px;border-radius:3px;border:1px solid #D3C29A}
+.maplibregl-popup-content{background:#FBF5E4;color:#2B2119;font:400 13px/1.45 var(--mono);border:1px solid #9C8656;border-radius:4px;padding:10px 12px;box-shadow:0 3px 12px rgba(60,40,10,.25);max-width:300px}
+.maplibregl-popup-content b.t{display:block;font:400 19px/1.15 var(--hand);color:#A3261B;margin-bottom:3px;padding-right:12px}
+.maplibregl-popup-content .m{color:#6E604E}
+.maplibregl-popup-content a{color:#A3261B}
+.maplibregl-popup-content .dial{float:right;margin:0 0 4px 8px}
+.maplibregl-popup-tip{border-top-color:#9C8656!important;border-bottom-color:#9C8656!important}
+.maplibregl-ctrl-attrib{font:400 11px/1.3 var(--mono)!important;background:rgba(251,245,228,.85)!important}
+.maplibregl-ctrl-group{background:#FBF5E4!important;border:1px solid #9C8656}
+.nojs{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:400 14px var(--mono);color:#6E604E;padding:20px;text-align:center}
+@media (max-width:1000px){.ov-top{left:10px;right:54px;max-width:none;align-items:flex-start}.chips{justify-content:flex-start}.lp{left:10px;right:auto}.cartouche{top:auto;bottom:44px;left:auto;right:54px}}
+@media (max-width:600px){
+  #map{height:calc(100svh - 43px - 64px);min-height:440px}
+  .tb-k,.tb-links a:not(:first-of-type){display:none}
+  .ov-top{left:8px;top:8px}
+  .chips{flex-wrap:nowrap;overflow-x:auto}
+  .chip .lg{display:none}
+  .lp{top:96px;left:8px;right:8px;width:auto}
+  .cartouche{left:8px;right:auto;bottom:36px;max-width:calc(100% - 60px);padding:8px 11px}
+  .cartouche h1{font-size:21px}.cartouche .dek{display:none}
+  .ct-toggle{display:block}.ct-fold{display:none}
+  .lgd{bottom:auto;top:96px;left:8px;width:220px}
+  .lgd.fold .lgd-b{display:none}.lgd.fold{padding:0;border:0;background:none;width:auto}.lgd.fold .lgd-t{display:block}
+  .ov-br{display:none}
+  h2{font-size:28px}
+}
+
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a class="tb-name" href="#map">Pitch orientation</a>
+  <span class="tb-k">Data study · 2026</span>
+  <nav class="tb-links"><a href="#essay">About</a><button class="theme" id="theme" aria-label="Toggle dark mode">◐</button><a href="https://doi.org/10.5281/zenodo.24075295">Paper</a><a href="https://github.com/Tristan-Hotham/pitch-orientation">Data and code</a></nav>
+</div>
+
+<div class="mapband">
+  <div id="map" data-fullscreen-map role="application" aria-label="Hand-inked world map with every measured sports pitch drawn along its axis, and rose diagrams of their directions">
+    <div class="nojs" id="nojs">Loading the map. It needs JavaScript and WebGL.</div>
+    <div class="cartouche" id="cartouche">
+      <button class="ct-toggle" id="ctToggle" aria-expanded="true" title="Show the title">Which way do pitches face? ▾</button>
+      <button class="ct-fold" id="ctFold" title="Fold the title" aria-label="Fold the title">▴</button>
+      <div class="ct-body">
+        <div class="kicker"><b>Data study</b><span>2026</span></div>
+        <h1>Which way do cricket pitches <span class="a">face</span>?</h1>
+        <p class="dek">Every pitch in OpenStreetMap with a measurable length, tinted by how far it turns from north to south. Zoomed out, each rose shows the directions of the pitches in its square. Zoom in to see single pitches, and tap one.</p>
+        <div class="byline">Dr Tristan Hotham · Independent researcher · 2026</div>
+      </div>
+    </div>
+    <div class="ov ov-top">
+      <div class="srch"><input type="search" id="q" placeholder="Find a town or a ground" aria-label="Find a town or a ground" autocomplete="off"><ul class="sug" id="sug" role="listbox"></ul></div>
+      <div class="chips" id="chips"><button class="chip lyr" id="lyrBtn" aria-expanded="false" aria-controls="lp">Layers and filters</button>
+        <button class="chip on" data-go="uk">Britain</button><button class="chip" data-go="aus">Australia</button><button class="chip" data-go="nz">New Zealand</button><button class="chip" data-go="sa">South Asia</button></div>
+    </div>
+    <div class="lp" id="lp" role="dialog" aria-label="Map layers and filters">
+      <h4>Pitches</h4>
+      <div class="note">Sport (UK only, except cricket)</div>
+      <select id="spSel" aria-label="Sport"></select>
+      <label><input type="checkbox" id="roseBox" checked> Rose diagrams (zoomed out)</label>
+      <label><input type="checkbox" id="pitchBox" checked> Single pitches (zoomed in)</label>
+      <label><input type="checkbox" id="osmBox" checked> Pitch outlines from the map tiles</label>
+      <h5>The inked map</h5>
+      <label><input type="checkbox" data-g="mountains" checked> Ink mountains and hills</label>
+      <label><input type="checkbox" data-g="forests" checked> Forests, marsh and moor</label>
+      <label><input type="checkbox" data-g="rivers" checked> Rivers and lakes</label>
+      <label><input type="checkbox" data-g="sea" checked> Sea shading and ripples</label>
+      <label><input type="checkbox" data-g="names" checked> Place names</label>
+      <label><input type="checkbox" data-g="borders" checked> Borders</label>
+      <label><input type="checkbox" data-g="roads" checked> Roads and streets</label>
+      <label><input type="checkbox" data-g="tint" checked> Watercolour tints</label>
+      <label><input type="checkbox" data-g="hillshade"> Hill shading</label>
+      <label><input type="checkbox" id="modern"> Plain modern map, for finding your way</label>
+    </div>
+    <div class="lgd" id="lgd" aria-live="polite">
+      <button class="lgd-t" id="lgdT" aria-expanded="false">Key ▾</button>
+      <div class="lgd-b">
+        <b>Turn from the north to south line</b>
+        <div class="bar" id="lgdBar"></div>
+        <div class="ends"><span>0°</span><span>45°</span><span>90°</span></div>
+        <div class="rw"><canvas id="rose" width="92" height="92" aria-label="Rose diagram of the pitches in view"></canvas>
+          <div class="rs" id="roseTxt"></div></div>
+      </div>
+    </div>
+    <div class="ov-br" id="count" aria-live="polite"></div>
+  </div>
+</div>
+
+<div class="wrap" id="essay">
+<p class="lede" style="margin-top:26px">Ask which way a cricket pitch should run and the design guides give one answer: roughly north to south. The game goes on into the evening, when the sun is low in the west, and a pitch that runs east to west would put that sun straight into the eyes of the batter at one end and the bowler at the other. Tennis courts get the same advice. FIFA's stadium guidelines say big football stadiums mostly run north to south too, but nobody seems to say much about the park pitch.</p>
+<p>So I measured them. OpenStreetMap has the outline of 15,168 cricket pitches around the world and 84,853 sports pitches of every kind in the United Kingdom. For each I took the long axis of the smallest rectangle that fits round it and worked out how far it turns from the north to south line.</p>
+<div class="byline">Dr Tristan Hotham · Independent researcher · 2026 · Data: OpenStreetMap contributors (ODbL); map: OpenStreetMap via OpenFreeMap</div>
+
+<div class="stats">
+  <div class="stat"><b>55%</b><span>of the world's 1,394 mapped cricket strips run within 20° of north to south (chance: 22%)</span></div>
+  <div class="stat"><b>69%</b><span>in Australia, the most obedient country</span></div>
+  <div class="stat"><b>40%</b><span>of 29,426 UK tennis courts do too</span></div>
+  <div class="stat"><b>26%</b><span>of 23,114 UK football pitches: hardly better than chance</span></div>
+</div>
+
+<h2><span class="n">01 · Strip, square and ground</span>What counts as a cricket pitch</h2>
+<p>A cricket "pitch" means three different things, and OpenStreetMap mappers use the tag for all of them. The <b>strip</b> is the 22 yards between the wickets, a rectangle about 25.9 m by 2.9 m as mapped, and it has an obvious axis. The <b>square</b> is the block of a dozen or so strips laid side by side in the middle of a club ground; its strips could run along either side, so the only thing it can tell us is whether it is set square to the compass. The <b>ground</b> is the whole field, usually round or oval, with no axis at all. I sorted every cricket polygon by size and shape: 1,394 strips, 1,117 squares, 9,980 grounds and 562 practice nets, which are kept apart.</p>
+<div class="figure"><img src="img/shapes.png" alt="Three outlines at their own scales: a thin strip 27 by 3 metres with its long axis drawn, a near-square block of strips, and a round cricket ground" loading="lazy" width="1200" height="517"><p class="src">The three things mapped as a cricket pitch. Only the strip has an axis that is the pitch.</p></div>
+
+<h2><span class="n">02 · The rule holds</span>Cricket strips run north to south</h2>
+<p>Of the 1,394 strips, 55% lie within 20° of the north to south line and 66% within 30°. A strip pointing at random would manage 22.2% and 33.3%. Only 9.9% run within 20° of east to west. In the United Kingdom the share is 47% of 209 strips; in Australia 69% of 692; in New Zealand only 34% of 338.</p>
+<p>Club squares in the United Kingdom, where the strips themselves are seldom mapped, tell the same story in their own way: a square is usually wider across its strips than along them, and 32% of the 578 UK squares have their long side within 20° of east to west, against 17% with it north to south. Strips side by side across an east to west block run north to south.</p>
+<div class="figure"><img src="img/map.png" alt="Three maps, of Britain, south-east Australia and New Zealand, with every cricket strip as a short line: most Australian lines are red and vertical, British ones mostly so, New Zealand ones point more ways" loading="lazy" width="1200" height="600"><p class="src">Every mapped strip in the three countries with the most, tinted by its turn from north to south.</p></div>
+
+<h2><span class="n">03 · Other sports</span>Tennis follows the rule. Football does not.</h2>
+<p>Among UK pitches of other sports, measured the same way, tennis courts come closest to cricket: 40% of 29,426 lie within 20° of north to south and only 12% within 20° of east to west. Netball manages 30%. Football (26%), rugby (25%) and Gaelic games (24%) sit near chance, and football and rugby pitches are as likely to run east to west (25% of football pitches) as north to south: they follow the shape of the field they were fitted into, not the sun.</p>
+<div class="figure"><img src="img/sports.png" alt="Bar chart: within 20 degrees of north to south, cricket strips 47 percent, tennis 40, netball 30, hockey 28, basketball 27, football 26, rugby 25, Gaelic 24; chance is 22" loading="lazy" width="1200" height="683"><p class="src">United Kingdom, share within 20° and 30° of north to south, by sport.</p></div>
+<div class="figure"><img src="img/roses.png" alt="Five rose diagrams: UK and Australian cricket strips and UK tennis courts form narrow north to south bow ties; UK football pitches form a cross pointing north to south and east to west; UK cricket squares lean east to west" loading="lazy" width="1200" height="548"><p class="src">The direction of every pitch, as a rose.</p></div>
+
+<h2><span class="n">04 · Around the world</span>Australia keeps the rule best</h2>
+<p>Strips are mapped in 25 countries, but only six have twenty or more. Australia leads with 69%, then the United States (49% of 41), the United Kingdom (47%), Canada (46% of 22), New Zealand (34%) and Samoa (29% of 24). In India, Pakistan, Sri Lanka, Bangladesh and the Caribbean, mappers have drawn grounds rather than strips, so the comparison cannot be made fairly; where an Indian ground is oval enough to have a long axis, 43% of 341 run within 20° of north to south.</p>
+<div class="figure"><img src="img/countries.png" alt="Bar chart of the share of cricket strips within 20 degrees of north to south: Australia 69 percent, United Kingdom 47, United States 46, Canada 46, New Zealand 35, Samoa 29" loading="lazy" width="1200" height="701"><p class="src">Countries with at least 20 mapped strips.</p></div>
+
+<h2><span class="n">05 · The sun</span>How much does it matter?</h2>
+<p>To see what the rule protects against, I modelled the sun. For a pitch at a given latitude and direction, I counted the minutes in a cricket season when the sun is less than 15° high and within 15° of the line of the pitch, from 10 in the morning until sunset. At 52°N, in an English season from April to September, a pitch running east to west gets about 88 hours of that low sun along it; a pitch running north to south gets none. In fact any line from -33° to 61° from north is free of it, a wide arc that leans east, because the summer evening sun sets in the north-west. 74% of UK strips sit in that arc, against 53% by chance; of all strips worldwide, measured against their own latitude, 82% do.</p>
+<div class="figure"><img src="img/glare.png" alt="Line chart of the hours of low sun along a pitch by its direction: zero for north to south, peaking for pitches running east-south-east to west-north-west in England and east-north-east to west-south-west in Sydney; beside it a band of glare-free directions by latitude" loading="lazy" width="1200" height="664"><p class="src">The glare model: hours of low sun along the pitch per season, by direction, and the glare-free arc by latitude.</p></div>
+
+<h2><span class="n">06 · The street</span>In towns, the grid wins</h2>
+<p>For every strip and square, and samples of other pitches, I read the roads within 200 m from OpenFreeMap's vector tiles and found the main direction of the local street grid. Where a pitch sits in a built-up place whose grid turns at least 15° from the compass, most pitches line up with the streets rather than the compass: 85% of football pitches, 80% of tennis courts, but only 66% of cricket strips, and 53% of Australian ones. Of the sports measured, cricket is the least likely to follow the streets, which fits a game that tries to keep the sun out of the batter's eyes.</p>
+<div class="figure"><img src="img/streets.png" alt="Three histograms: football pitches and tennis courts in towns cluster near zero degrees from the street grid; cricket strips less so" loading="lazy" width="1200" height="609"><p class="src">Pitches in towns with a grid turned off the compass: angle to the street grid (bars) and to the compass (line).</p></div>
+
+<h2><span class="n">07 · How I made this</span>Measuring a pitch</h2>
+<p><b>Outlines.</b> Every OpenStreetMap way or relation tagged as a pitch with a sport in the United Kingdom, and every cricket pitch way in the world, extracted with the QLever query engine. Each outline is laid flat around its own centre with north kept true; the long side of the smallest rectangle that fits round it gives the axis. Other sports were kept only where the rectangle has the size and shape of one playing area (for example a tennis court 22 to 42 m long and 1.6 to 2.6 times as long as wide), which drops blocks of several courts whose long side runs across them.</p>
+<p><b>Checks.</b> I drew every strip of a random sample with the roads and buildings around it and looked at them. About 10 in 120 were banks of practice nets at the edge of a ground, not the pitch in the middle. So rectangles 6 to 12 m wide, and strips just outside a mapped ground, are now counted as nets: 19.4% of the first strip list moved. A second sample of 60 found 1 doubtful case. Grounds with many mapped strips do not drive the result: counting each ground once, 54% lie within 20° of north to south.</p>
+<p><b>What it cannot say.</b> OpenStreetMap is uneven: strips are mapped mostly in Australia, New Zealand and Britain, and hardly at all in South Asia and the Caribbean, where most cricket is played. The country of a pitch tells us nothing about who built it or when. The glare model is a simple one: it ignores trees, stands, cloud and the hours of real matches, and serves only to show which directions the low sun can reach.</p>
+
+<details><summary>Country by country</summary>
+<div class="tw"><table class="words" id="ctab"><tr><th>Country</th><th class="r">Strips</th><th class="r">Within 20°</th><th class="r">Squares set to the compass (10°)</th><th class="r">Oval grounds</th><th class="r">Within 20°</th></tr><tr><td>United Kingdom</td><td class="r">209</td><td class="r">47%</td><td class="r">28%</td><td class="r">763</td><td class="r">28%</td></tr><tr><td>Australia</td><td class="r">692</td><td class="r">69%</td><td class="r">50%</td><td class="r">1515</td><td class="r">58%</td></tr><tr><td>New Zealand</td><td class="r">338</td><td class="r">34%</td><td class="r">32%</td><td class="r">83</td><td class="r">34%</td></tr><tr><td>India</td><td class="r">17</td><td class="r">53%</td><td class="r">47%</td><td class="r">341</td><td class="r">43%</td></tr><tr><td>South Africa</td><td class="r">13</td><td class="r">46%</td><td class="r">29%</td><td class="r">129</td><td class="r">35%</td></tr><tr><td>Pakistan</td><td class="r">3</td><td class="r">few</td><td class="r">17%</td><td class="r">69</td><td class="r">29%</td></tr><tr><td>Sri Lanka</td><td class="r">1</td><td class="r">few</td><td class="r">few</td><td class="r">65</td><td class="r">26%</td></tr><tr><td>Bangladesh</td><td class="r">2</td><td class="r">few</td><td class="r">few</td><td class="r">32</td><td class="r">56%</td></tr><tr><td>Caribbean</td><td class="r">1</td><td class="r">few</td><td class="r">few</td><td class="r">76</td><td class="r">36%</td></tr><tr><td>United States</td><td class="r">41</td><td class="r">49%</td><td class="r">47%</td><td class="r">52</td><td class="r">42%</td></tr><tr><td>Canada</td><td class="r">22</td><td class="r">46%</td><td class="r">few</td><td class="r">15</td><td class="r">53%</td></tr><tr><td>Samoa</td><td class="r">24</td><td class="r">29%</td><td class="r">few</td><td class="r">6</td><td class="r">few</td></tr><tr><td>Ireland</td><td class="r">2</td><td class="r">few</td><td class="r">few</td><td class="r">17</td><td class="r">29%</td></tr></table></div>
+</details>
+
+<details><summary>Sources and licences</summary>
+<ul class="plain">
+<li>Pitch outlines and names: © OpenStreetMap contributors, Open Database Licence, queried through QLever (osm2rdf). The derived pitch table is under the ODbL.</li>
+<li>Street grid: OpenFreeMap vector tiles (OpenMapTiles schema, OpenStreetMap data). Countries and towns for search: Natural Earth (public domain).</li>
+<li>Design guidance: Government of Western Australia, Sports dimensions guide (2025); FIFA Stadium Guidelines (2022), section 2.2.</li>
+<li>Solar position: the Spencer (1971) declination series; refraction: Bennett (1982).</li>
+<li>Map: OpenStreetMap contributors (ODbL), vector tiles by OpenFreeMap; the Inked World map style and its data (Natural Earth, RESOLVE Ecoregions 2017 CC BY 4.0, Wikidata CC0), from the ink-map study; elevation from AWS Terrain Tiles.</li>
+<li>Fonts: MedievalSharp and the IM Fell types (SIL Open Font License). MapLibre GL JS 4.7.1 (BSD 3-Clause).</li>
+</ul></details>
+
+
+<div class="cta"><a class="p" href="https://doi.org/10.5281/zenodo.24075295">Read the paper</a><a href="https://github.com/Tristan-Hotham/pitch-orientation">Data and code</a><a href="https://blog.tristanhotham.com/2026/10/31/pitch-orientation/">Blog post</a></div>
+
+<footer>
+<p>Dr Tristan Hotham, Independent researcher. ORCID <a href="https://orcid.org/0000-0003-4931-9349">0000-0003-4931-9349</a>.</p>
+<p>Cite as: Hotham, T. (2026) Which way do cricket pitches face? Zenodo. <a href="https://doi.org/10.5281/zenodo.24075295">10.5281/zenodo.24075295</a></p>
+<p>Code: <a href="https://github.com/Tristan-Hotham/pitch-orientation">github.com/Tristan-Hotham/pitch-orientation</a> (MIT). Text and figures CC BY 4.0; pitch data derived from OpenStreetMap © OpenStreetMap contributors (ODbL).</p>
+<p>I wrote the text, with drafting and editing assistance from Claude (Anthropic), which also helped prepare the analysis code. I reviewed and checked all text and results.</p>
+</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="js/curated.js?v=1"></script>
+<script src="js/ink-palette.js?v=1"></script>
+<script src="js/ink-icons.js?v=1"></script>
+<script src="js/ink-houses.js?v=1"></script>
+<script src="js/ink-map.js?v=1"></script>
+<script src="js/ink-extras.js?v=1"></script>
+<script>
+(function () {
+  const qs = new URLSearchParams(location.search);
+  const opts = { workerConfig: { heritage: '', hills: '', places: '' } };
+  if (qs.get('tj')) opts.tilejson = qs.get('tj');
+  const start = qs.get('at') ? qs.get('at').split(',').map(Number) : null;
+  const phone = matchMedia('(max-width:600px)').matches;
+  const VIEWS = { uk: [[-2.6, 53.4], phone ? 4.6 : 5.4], aus: [[145.5, -33.5], phone ? 3.6 : 4.4], nz: [[173.0, -41.2], phone ? 4.2 : 5.0], sa: [[76.0, 20.0], phone ? 3.4 : 4.2] };
+  opts.mapOptions = start ? { center: [start[1], start[0]], zoom: start[2] } : { center: VIEWS.uk[0], zoom: VIEWS.uk[1] };
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const STOPS = [[0, "#9E1F14"], [5, "#C4471F"], [12, "#DE8A2E"], [22, "#C9A35C"], [35, "#93A0A2"], [55, "#7F98B4"], [90, "#4F6F9A"]];
+  const GLARE = {"-46": [-62, 39], "-45": [-63, 40], "-44": [-63, 40], "-43": [-64, 41], "-42": [-64, 42], "-41": [-65, 42], "-40": [-65, 43], "-39": [-65, 43], "-38": [-66, 44], "-37": [-66, 44], "-36": [-67, 45], "-35": [-67, 45], "-34": [-67, 45], "-33": [-68, 46], "-32": [-68, 46], "-31": [-68, 47], "-30": [-69, 47], "-29": [-69, 47], "-28": [-69, 47], "-27": [-70, 48], "-26": [-70, 48], "-25": [-70, 48], "-24": [-70, 48], "-23": [-71, 49], "-22": [-71, 49], "-21": [-71, 49], "-20": [-72, 49], "-19": [-72, 49], "-18": [-72, 50], "-17": [-73, 50], "-16": [-73, 50], "-15": [-73, 50], "-14": [-73, 50], "-13": [-74, 50], "-12": [-74, 50], "-11": [-74, 51], "-10": [-74, 51], "-9": [-47, 51], "-8": [-48, 51], "-7": [-48, 51], "-6": [-48, 51], "-5": [-49, 51], "-4": [-49, 51], "-3": [-49, 51], "-2": [-50, 51], "-1": [-50, 51], "0": [-77, 50], "1": [-77, 50], "2": [-77, 50], "3": [-77, 49], "4": [-77, 49], "5": [-77, 49], "6": [-77, 48], "7": [-77, 48], "8": [-77, 48], "9": [-77, 47], "10": [-77, 47], "11": [-77, 46], "12": [-77, 46], "13": [-77, 46], "14": [-77, 45], "15": [-77, 45], "16": [-77, 44], "17": [-77, 44], "18": [-77, 43], "19": [-77, 43], "20": [-77, 42], "21": [-77, 42], "22": [-77, 41], "23": [-77, 40], "24": [-48, 72], "25": [-48, 71], "26": [-48, 71], "27": [-48, 71], "28": [-47, 70], "29": [-47, 70], "30": [-47, 70], "31": [-47, 69], "32": [-46, 69], "33": [-46, 69], "34": [-45, 68], "35": [-45, 68], "36": [-45, 68], "37": [-44, 67], "38": [-44, 67], "39": [-43, 67], "40": [-43, 66], "41": [-42, 66], "42": [-42, 65], "43": [-41, 65], "44": [-40, 65], "45": [-40, 64], "46": [-39, 64], "47": [-38, 63], "48": [-37, 63], "49": [-36, 62], "50": [-35, 62], "51": [-34, 61], "52": [-33, 61], "53": [-32, 60], "54": [-31, 59], "55": [-30, 59], "56": [-28, 58], "57": [-26, 57], "58": [-25, 56], "59": [-22, 56], "60": [-20, 55]};
+  let D = null, map = null, P = null;
+  const state = { sp: 'strip' };
+  // sport choices: [label, test on class index]
+  const SPORTS = [['strip', 'Cricket strips (single pitches)', [0]], ['nets', 'Cricket practice nets', [3]], ['square', 'Cricket squares (compass only)', [1]], ['ground', 'Cricket grounds (oval)', [2]],
+                  ['tennis', 'Tennis courts', [5]], ['football', 'Football pitches', [4]], ['rugby', 'Rugby pitches', [6]], ['hockey', 'Hockey pitches', [7]],
+                  ['netball', 'Netball courts', [8]], ['basketball', 'Basketball courts', [9]], ['gaelic', 'Gaelic games pitches', [10]], ['all', 'Every sport with an axis', [0, 3, 4, 5, 6, 7, 8, 9, 10]]];
+
+  const ct = $('cartouche');
+  const fold = f => { ct.classList.toggle('folded', f); $('ctToggle').setAttribute('aria-expanded', String(!f)); };
+  if (phone) { fold(true); $('lgd').classList.add('fold'); }
+  $('ctToggle').addEventListener('click', () => fold(!ct.classList.contains('folded')));
+  $('ctFold').addEventListener('click', () => fold(true));
+  $('lgdT').addEventListener('click', () => { const f = $('lgd').classList.toggle('fold'); $('lgdT').setAttribute('aria-expanded', String(!f)); });
+  document.addEventListener('fullscreenchange', () => { if (document.fullscreenElement) fold(true); });
+  function col(a) { a = Math.min(90, Math.abs(a)); for (let i = 1; i < STOPS.length; i++) { if (a <= STOPS[i][0]) { const [a0, c0] = STOPS[i - 1], [a1, c1] = STOPS[i]; const t = (a - a0) / (a1 - a0); const h = c => [1, 3, 5].map(j => parseInt(c.substr(j, 2), 16)); const x = h(c0), y = h(c1); return 'rgb(' + x.map((v, j) => Math.round(v + (y[j] - v) * t)).join(',') + ')'; } } return STOPS[STOPS.length - 1][1]; }
+  (function () { const g = []; for (let k = 0; k <= 20; k++) { const a = k / 20 * 90; g.push(col(a) + ' ' + (k * 5) + '%'); } $('lgdBar').style.background = 'linear-gradient(90deg,' + g.join(',') + ')'; })();
+  const nsd = b => { b = ((b % 180) + 180) % 180; return Math.min(b, 180 - b); };
+
+  const dataP = fetch('data/pitches.json').then(r => r.json());
+  InkMap.create('map', opts).then(m => {
+    map = window.__map = m; window.__popup = (i, ll) => popup(i, ll);
+    $('nojs').remove();
+    const foldAttr = () => { const at = document.querySelector('.maplibregl-ctrl-attrib.maplibregl-compact'); if (at) { at.classList.remove('maplibregl-compact-show'); at.removeAttribute('open'); } };
+    map.once('idle', foldAttr); foldAttr();
+    map.addControl(new maplibregl.NavigationControl({ showCompass: true, visualizePitch: false }), 'bottom-right');
+    if (InkMap.setWinter) InkMap.setWinter(map, false);
+    ['heritage', 'flight', 'animals', 'farms', 'towns'].forEach(g => InkMap.setGroup(map, g, false));
+    const isDark = () => { const r = document.documentElement; return r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; };
+    const tone = () => InkMap.setSeaTone && InkMap.setSeaTone(map, isDark());
+    tone(); new MutationObserver(tone).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    dataP.then(d => { D = d; addPitches(); buildUI(); }).catch(e => console.error('pitches', e));
+    setupLayers();
+  }).catch(e => { console.error(e); const n = $('nojs'); if (n) n.textContent = 'The map could not load: ' + e.message; });
+
+  function firstSymbol() { const ls = map.getStyle().layers; const l = ls.find(x => x.metadata && x.metadata.group === 'names'); return l ? l.id : undefined; }
+  // a pitch glyph: a long rectangle with crease marks, drawn pointing up (north), rotated by the bearing
+  function stripImage() {
+    const W = 16, H = 64, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+    g.fillStyle = '#000'; g.fillRect(3, 2, W - 6, H - 4); g.clearRect(5, 9, W - 10, 2); g.clearRect(5, H - 11, W - 10, 2);
+    return { width: W, height: H, data: g.getImageData(0, 0, W, H).data };
+  }
+  function squareImage() {
+    const W = 40, c = document.createElement('canvas'); c.width = W; c.height = W; const g = c.getContext('2d');
+    g.strokeStyle = '#000'; g.lineWidth = 5; g.strokeRect(5, 5, W - 10, W - 10); g.fillStyle = '#000'; g.fillRect(17, 2, 6, 10);
+    return { width: W, height: W, data: g.getImageData(0, 0, W, W).data };
+  }
+  function ringImage() {
+    const W = 40, c = document.createElement('canvas'); c.width = W; c.height = W; const g = c.getContext('2d');
+    g.strokeStyle = '#000'; g.lineWidth = 5; g.beginPath(); g.ellipse(20, 20, 16, 13, 0, 0, 7); g.stroke();
+    return { width: W, height: W, data: g.getImageData(0, 0, W, W).data };
+  }
+  function addPitches() {
+    const K = D.keys, ix = Object.fromEntries(K.map((k, i) => [k, i]));
+    P = D.rows.map((r, i) => ({ i, lon: r[ix.lon], lat: r[ix.lat], b: r[ix.bearing], L: r[ix.length], Wd: r[ix.width], c: r[ix.cls], k: r[ix.country], n: r[ix.name], osm: r[ix.osm], ax: r[ix.axis], d: 0 }));
+    P.forEach(p => { p.d = p.ax === 2 ? Math.min(p.b % 90, 90 - p.b % 90) : nsd(p.b); });
+    map.addImage('strip', stripImage(), { sdf: true, pixelRatio: 2 });
+    map.addImage('sq', squareImage(), { sdf: true, pixelRatio: 2 });
+    map.addImage('ring', ringImage(), { sdf: true, pixelRatio: 2 });
+    // pitch outlines from the OpenFreeMap tiles (landuse pitch), so the real shape shows when zoomed in
+    try {
+      map.addLayer({ id: 'osm-pitch', type: 'line', source: 'ofm', 'source-layer': 'landuse', minzoom: 14, filter: ['==', ['get', 'class'], 'pitch'],
+        paint: { 'line-color': '#5C7A2E', 'line-width': ['interpolate', ['linear'], ['zoom'], 14, 0.6, 18, 1.6], 'line-opacity': 0.85 } }, firstSymbol());
+    } catch (e) { console.warn('no pitch outlines', e); }
+    const feats = P.map(p => ({ type: 'Feature', id: p.i, geometry: { type: 'Point', coordinates: [p.lon, p.lat] }, properties: { b: p.b, d: Math.round(p.d * 10) / 10, c: p.c, ax: p.ax } }));
+    map.addSource('pt', { type: 'geojson', data: { type: 'FeatureCollection', features: feats }, attribution: 'Pitches: <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> (ODbL)' });
+    const ramp = ['interpolate', ['linear'], ['get', 'd']]; STOPS.forEach(([a, c]) => ramp.push(a, c));
+    map.addLayer({ id: 'pt', type: 'symbol', source: 'pt', minzoom: 8, layout: {
+      'icon-image': ['match', ['get', 'ax'], 1, 'strip', 2, 'sq', 'ring'], 'icon-rotate': ['get', 'b'], 'icon-rotation-alignment': 'map', 'icon-allow-overlap': true, 'icon-ignore-placement': true,
+      'icon-size': ['interpolate', ['linear'], ['zoom'], 8, 0.22, 11, 0.4, 14, 0.62, 17, 0.9], 'symbol-sort-key': ['-', 0, ['get', 'd']] },
+      paint: { 'icon-color': ['case', ['==', ['get', 'ax'], 0], '#6E604E', ramp], 'icon-halo-color': 'rgba(43,33,25,0.55)', 'icon-halo-width': 0.6,
+               'icon-opacity': ['interpolate', ['linear'], ['zoom'], 8, 0, 8.6, 1, 16, 1, 17.5, 0.55] } }, firstSymbol());
+    map.addSource('roses', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+    map.addLayer({ id: 'roses', type: 'symbol', source: 'roses', maxzoom: 8.6, layout: { 'icon-image': ['get', 'img'], 'icon-allow-overlap': true, 'icon-ignore-placement': true,
+      'icon-size': ['interpolate', ['linear'], ['zoom'], 2, ['*', 0.55, ['get', 's']], 5, ['*', 0.8, ['get', 's']], 8, ['get', 's']] }, paint: { 'icon-opacity': ['interpolate', ['linear'], ['zoom'], 7.8, 1, 8.6, 0] } }, firstSymbol());
+    map.on('click', 'pt', e => popup(e.features[0].id, e.lngLat));
+    map.on('click', 'roses', e => { const f = e.features[0]; map.flyTo({ center: f.geometry.coordinates, zoom: Math.min(9.2, map.getZoom() + 2.5), duration: 1000 }); });
+    ['pt', 'roses'].forEach(l => { map.on('mouseenter', l, () => map.getCanvas().style.cursor = 'pointer'); map.on('mouseleave', l, () => map.getCanvas().style.cursor = ''); });
+    map.on('moveend', updateStats);
+    map.on('zoomend', () => { const lv = level(); if (lv !== curLevel) buildRoses(); });
+    applyFilter();
+  }
+  function shown(p) { const s = SPORTS.find(x => x[0] === state.sp); return s[2].includes(p.c); }
+  let curLevel = -1, roseImgs = [];
+  function level() { const z = map.getZoom(); return z < 3.6 ? 0 : z < 5.6 ? 1 : 2; }
+  const CELL = [4, 1, 0.25];
+  function roseCanvas(h, mod90) {
+    const S = 72, c = document.createElement('canvas'); c.width = S; c.height = S; const g = c.getContext('2d'), cx = S / 2, r = S / 2 - 3, mx = Math.max(1, ...h);
+    g.fillStyle = 'rgba(251,245,228,0.82)'; g.strokeStyle = 'rgba(43,33,25,0.55)'; g.lineWidth = 1.2; g.beginPath(); g.arc(cx, cx, r, 0, 7); g.fill(); g.stroke();
+    g.strokeStyle = 'rgba(156,134,86,0.6)'; g.lineWidth = 0.8; g.beginPath(); g.moveTo(cx, cx - r); g.lineTo(cx, cx + r); g.moveTo(cx - r, cx); g.lineTo(cx + r, cx); g.stroke();
+    const nb = h.length, w = 180 / nb;
+    for (let k = 0; k < nb; k++) { const len = (r - 2) * Math.sqrt(h[k] / mx); if (!len) continue;
+      for (const off of [0, 180]) { const t0 = (k * w + off - 90) * Math.PI / 180, t1 = ((k + 1) * w + off - 90) * Math.PI / 180;
+        g.fillStyle = col(mod90 ? Math.min(k * w + w / 2, 90 - (k * w + w / 2) % 90) : nsd(k * w + w / 2)); g.beginPath(); g.moveTo(cx, cx); g.arc(cx, cx, len, t0, t1); g.closePath(); g.fill(); } }
+    return g.getImageData(0, 0, S, S);
+  }
+  function buildRoses() {
+    if (!P) return;
+    curLevel = level(); const cs = CELL[curLevel];
+    roseImgs.forEach(id => { if (map.hasImage(id)) map.removeImage(id); }); roseImgs = [];
+    const cells = new Map(), mod90 = state.sp === 'square';
+    for (const p of P) { if (!shown(p) || p.ax === 0) continue;
+      const key = Math.floor(p.lon / cs) + ',' + Math.floor(p.lat / cs); let c = cells.get(key);
+      if (!c) { c = { h: new Array(18).fill(0), n: 0, x: 0, y: 0 }; cells.set(key, c); }
+      const b = mod90 ? p.b % 90 : p.b % 180; c.h[Math.min(17, Math.floor(b / 10))]++; if (mod90) c.h[Math.min(17, Math.floor((b + 90) / 10))]++; c.n++; c.x += p.lon; c.y += p.lat; }
+    const feats = []; let j = 0; const minN = curLevel === 2 ? 3 : 5;
+    for (const [key, c] of cells) { if (c.n < minN) continue; const id = 'r' + (j++); map.addImage(id, roseCanvas(c.h, mod90), { pixelRatio: 2 }); roseImgs.push(id);
+      feats.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [c.x / c.n, c.y / c.n] }, properties: { img: id, s: Math.min(1.5, 0.55 + Math.sqrt(c.n) / 12), n: c.n } }); }
+    map.getSource('roses').setData({ type: 'FeatureCollection', features: feats });
+  }
+  function popup(i, ll) {
+    const p = P[i], osmT = p.osm[0] === 'w' ? 'way' : 'relation', id = p.osm.slice(1);
+    const nm = p.n || D.classes[p.c];
+    let h = '<b class="t">' + esc(nm) + '</b>' + dial(p) + '<div>' + (p.n ? esc(D.classes[p.c]) + (p.k >= 0 ? ', ' : '') : '') + (p.k >= 0 ? esc(D.countries[p.k]) : '') + '</div>';
+    if (p.ax === 1) h += '<div>Axis ' + p.b.toFixed(0) + '° to ' + ((p.b + 180) % 360).toFixed(0) + '°: <b>' + turnTxt(p.b) + '</b></div>';
+    else if (p.ax === 2) h += '<div>Sides turned ' + p.d.toFixed(0) + '° from the compass. A square holds many strips, so it has no single axis.</div>';
+    else h += '<div>Round or oval: no axis to measure.</div>';
+    h += '<div class="m">Measured ' + p.L + ' m by ' + p.Wd + ' m</div>';
+    if (p.ax === 1 && (p.c === 0 || p.c === 3)) { const g = GLARE[Math.max(-46, Math.min(60, Math.round(p.lat)))]; if (g) { let b = p.b > 90 ? p.b - 180 : p.b; const safe = b >= g[0] && b <= g[1];
+      h += '<div class="m" style="margin-top:4px">' + (safe ? 'Inside' : 'Outside') + ' the glare-free arc for this latitude (' + fmtB(g[0]) + ' to ' + fmtB(g[1]) + '), so the low sun ' + (safe ? 'never lines up with it' : 'can line up with it') + ' in the model.</div>'; } }
+    h += '<div style="margin-top:5px"><a href="https://www.openstreetmap.org/' + osmT + '/' + id + '" target="_blank" rel="noopener">OpenStreetMap ' + osmT + ' ' + id + '</a></div>';
+    const at = ll || [p.lon, p.lat], pt = map.project(at), H = map.getContainer().clientHeight;
+    if (pt.y < H * 0.45 || pt.y > H - 120) map.panTo(at, { offset: [0, H * 0.22], duration: 600 });
+    new maplibregl.Popup({ maxWidth: '300px', anchor: 'bottom' }).setLngLat(at).setHTML(h).addTo(map);
+  }
+  function fmtB(b) { return b === 0 ? 'north' : Math.abs(b) + '° ' + (b < 0 ? 'west' : 'east') + ' of north'; }
+  function turnTxt(b) { const d = nsd(b); if (d < 0.5) return 'north to south'; if (d > 89.5) return 'east to west'; const e = (b % 180 < 90); return d.toFixed(0) + '° ' + (e ? 'east' : 'west') + ' of north'; }
+  function dial(p) {
+    const R = 26, cx = 30, cy = 30, pt = (a, r) => [cx + Math.sin(a * Math.PI / 180) * r, cy - Math.cos(a * Math.PI / 180) * r];
+    let s = '<svg class="dial" width="60" height="60" viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="' + R + '" fill="#F6EED8" stroke="#9C8656"/><text x="30" y="11" font-size="8" text-anchor="middle" fill="#6E604E">N</text>';
+    if (p.ax) { const bs = p.ax === 2 ? [p.b, p.b + 90] : [p.b]; for (const b of bs) { const [x1, y1] = pt(b, R - 3), [x0, y0] = pt(b + 180, R - 3); s += '<line x1="' + x0 + '" y1="' + y0 + '" x2="' + x1 + '" y2="' + y1 + '" stroke="' + col(p.d) + '" stroke-width="' + (p.ax === 2 ? 2 : 4) + '" stroke-linecap="round"/>'; } }
+    return s + '</svg>';
+  }
+  function applyFilter() {
+    if (!map || !map.getLayer('pt')) return;
+    const s = SPORTS.find(x => x[0] === state.sp);
+    map.setFilter('pt', ['in', ['get', 'c'], ['literal', s[2]]]);
+    buildRoses(); updateStats();
+  }
+  function updateStats() {
+    if (!P) return;
+    const b = map.getBounds(), h = new Array(36).fill(0); let n = 0, w20 = 0; const mod90 = state.sp === 'square';
+    for (const p of P) if (shown(p) && p.ax && b.contains([p.lon, p.lat])) { n++; h[Math.min(35, Math.floor((p.b % 180) / 5))]++; if (mod90 ? p.d <= 10 : p.d <= 20) w20++; }
+    drawRose(h);
+    $('roseTxt').innerHTML = '<b>' + (n ? Math.round(100 * w20 / n) : 0) + '%</b>' + (mod90 ? 'within 10° of the compass' : 'within 20° of north to south') + '<br>' + n.toLocaleString('en-GB') + ' in view';
+    $('count').textContent = n.toLocaleString('en-GB') + ' ' + SPORTS.find(x => x[0] === state.sp)[1].toLowerCase() + ' in view';
+  }
+  function drawRose(h) {
+    const cv = $('rose'), g = cv.getContext('2d'), r = 44, cx = 46, cy = 46, mx = Math.max(1, ...h);
+    g.clearRect(0, 0, 92, 92); g.strokeStyle = '#9C8656'; g.lineWidth = 1; g.beginPath(); g.arc(cx, cy, r, 0, 7); g.stroke();
+    g.strokeStyle = '#E2D3AE'; g.beginPath(); g.moveTo(cx, cy - r); g.lineTo(cx, cy + r); g.moveTo(cx - r, cy); g.lineTo(cx + r, cy); g.stroke();
+    for (let k = 0; k < 36; k++) { const a0 = k * 5, len = r * Math.sqrt(h[k] / mx);
+      for (const off of [0, 180]) { const t0 = (a0 + off - 90) * Math.PI / 180, t1 = (a0 + 5 + off - 90) * Math.PI / 180; g.fillStyle = col(nsd(a0 + 2.5)); g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, len, t0, t1); g.closePath(); g.fill(); } }
+    g.fillStyle = '#6E604E'; g.font = '9px IBM Plex Mono, monospace'; g.textAlign = 'center'; g.fillText('N', cx, 9);
+  }
+  function buildUI() {
+    SPORTS.forEach(s => { const o = document.createElement('option'); o.value = s[0]; o.textContent = s[1]; $('spSel').appendChild(o); });
+    $('spSel').value = state.sp;
+    $('spSel').addEventListener('change', e => { state.sp = e.target.value; applyFilter(); });
+    $('roseBox').addEventListener('change', e => map.setLayoutProperty('roses', 'visibility', e.target.checked ? 'visible' : 'none'));
+    $('pitchBox').addEventListener('change', e => map.setLayoutProperty('pt', 'visibility', e.target.checked ? 'visible' : 'none'));
+    $('osmBox').addEventListener('change', e => { if (map.getLayer('osm-pitch')) map.setLayoutProperty('osm-pitch', 'visibility', e.target.checked ? 'visible' : 'none'); });
+    document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => { const v = VIEWS[b.dataset.go]; document.querySelectorAll('[data-go]').forEach(x => x.classList.toggle('on', x === b)); map.flyTo({ center: v[0], zoom: v[1], duration: 1800 }); }));
+    setupSearch();
+  }
+  function setupLayers() {
+    const lp = $('lp'), btn = $('lyrBtn');
+    btn.addEventListener('click', e => { e.stopPropagation(); const o = lp.classList.toggle('open'); btn.setAttribute('aria-expanded', o); });
+    document.addEventListener('click', e => { if (!lp.contains(e.target) && e.target !== btn) { lp.classList.remove('open'); btn.setAttribute('aria-expanded', false); } });
+    const boxes = [...lp.querySelectorAll('input[data-g]')], modern = $('modern');
+    const NAME_LAYERS = map.getStyle().layers.filter(l => l.type === 'symbol' && l.metadata && ['names', 'rivers'].includes(l.metadata.group)).map(l => l.id);
+    const saved = {}; NAME_LAYERS.forEach(id => saved[id] = { c: map.getPaintProperty(id, 'text-color'), h: map.getPaintProperty(id, 'text-halo-color') });
+    function apply() {
+      const m = modern.checked;
+      boxes.forEach(b => { const g = b.dataset.g; const inkOnly = ['mountains', 'forests', 'sea', 'tint'].includes(g); InkMap.setGroup(map, g, b.checked && !(m && inkOnly)); });
+      InkMap.setGroup(map, 'paper', !m); InkMap.setGroup(map, 'modern', m); InkMap.setGroup(map, 'coast', !m);
+      NAME_LAYERS.forEach(id => { map.setPaintProperty(id, 'text-color', m ? '#333333' : saved[id].c); map.setPaintProperty(id, 'text-halo-color', m ? 'rgba(255,255,255,0.9)' : saved[id].h); });
+    }
+    boxes.forEach(b => b.addEventListener('change', apply)); modern.addEventListener('change', apply);
+  }
+  function setupSearch() {
+    const q = $('q'), sug = $('sug');
+    const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    let idx = null, places = null, sel = -1, items = [];
+    fetch('data/places.json').then(r => r.json()).then(p => { places = p.map(x => [norm(x[0]), x]); }).catch(() => {});
+    function show(list) { items = list; sel = -1; sug.innerHTML = list.map((it, k) => '<li role="option" data-k="' + k + '">' + esc(it.t) + ' <span>' + esc(it.s) + '</span></li>').join(''); sug.style.display = list.length ? 'block' : 'none'; }
+    function go(it) {
+      sug.style.display = 'none'; q.value = it.t;
+      if (it.i !== undefined) { const p = P[it.i]; map.flyTo({ center: [p.lon, p.lat], zoom: 16, duration: 1800 }); map.once('moveend', () => popup(it.i)); }
+      else map.flyTo({ center: it.c, zoom: 12, duration: 1800 });
+    }
+    q.addEventListener('input', () => {
+      const v = norm(q.value.trim()); if (v.length < 2) { show([]); return; }
+      if (!idx) idx = P.filter(p => p.n).map(p => [norm(p.n), p.i]);
+      const out = [];
+      if (places) for (const [n, x] of places) { if (n.startsWith(v)) { out.push({ t: x[0], s: x[1], c: [x[2], x[3]] }); if (out.length >= 5) break; } }
+      for (const [n, i] of idx) { if (n.startsWith(v) || (v.length > 3 && n.includes(v))) { const p = P[i]; out.push({ t: p.n, s: D.classes[p.c] + (p.k >= 0 ? ' · ' + D.countries[p.k] : ''), i }); if (out.length >= 14) break; } }
+      show(out);
+    });
+    q.addEventListener('keydown', e => {
+      const lis = [...sug.children];
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); sel = Math.max(0, Math.min(lis.length - 1, sel + (e.key === 'ArrowDown' ? 1 : -1))); lis.forEach((l, k) => l.setAttribute('aria-selected', k === sel)); }
+      else if (e.key === 'Enter' && items.length) { e.preventDefault(); go(items[Math.max(sel, 0)]); }
+      else if (e.key === 'Escape') sug.style.display = 'none';
+    });
+    sug.addEventListener('click', e => { const li = e.target.closest('li'); if (li) go(items[+li.dataset.k]); });
+  }
+  $('theme').addEventListener('click', () => { const r = document.documentElement; const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; r.dataset.theme = dark ? 'light' : 'dark'; });
+})();
+</script>
+<!-- map-fullscreen v1 -->
+<style id="mfs-style">
+.mfs-btn{position:absolute;top:10px;right:10px;z-index:1001;width:34px;height:34px;border:2px solid rgba(0,0,0,.25);border-radius:4px;background:#fff;color:#222;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.mfs-btn:hover{background:#f2f2f2}
+.mfs-btn svg{width:18px;height:18px}
+.mfs-host.mfs-btn-left .mfs-btn{right:auto;left:54px}
+.mfs-fake{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;height:100dvh!important;max-width:none!important;max-height:none!important;margin:0!important;z-index:100000!important;border-radius:0!important}
+html.mfs-lock,html.mfs-lock body{overflow:hidden!important}
+:fullscreen.mfs-host{width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;margin:0!important;border-radius:0!important}
+</style>
+<script id="mfs-script">
+(function(){
+  var ICON_OPEN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+  var ICON_CLOSE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>';
+  function poke(){setTimeout(function(){window.dispatchEvent(new Event('resize'));},60);setTimeout(function(){window.dispatchEvent(new Event('resize'));},400);}
+  function realFS(){return document.fullscreenElement||document.webkitFullscreenElement;}
+  function add(el){
+    if(el.__mfs)return; el.__mfs=1;
+    var cs=getComputedStyle(el); if(cs.position==='static')el.style.position='relative';
+    el.classList.add('mfs-host');
+    // avoid clashing with a top-right Leaflet control (e.g. "Map layers")
+    var tr=el.querySelector('.leaflet-top.leaflet-right');
+    if(tr&&tr.children.length){ el.classList.add('mfs-btn-left'); }
+    var b=document.createElement('button'); b.type='button'; b.className='mfs-btn';
+    b.title='Full screen map'; b.setAttribute('aria-label','Full screen map'); b.innerHTML=ICON_OPEN;
+    ['click','dblclick','mousedown','touchstart','wheel'].forEach(function(t){b.addEventListener(t,function(e){e.stopPropagation();},{passive:t!=='click'});});
+    function setIcon(on){b.innerHTML=on?ICON_CLOSE:ICON_OPEN;b.title=on?'Exit full screen':'Full screen map';b.setAttribute('aria-label',b.title);}
+    function exitFake(){el.classList.remove('mfs-fake');document.documentElement.classList.remove('mfs-lock');setIcon(false);poke();}
+    b.addEventListener('click',function(e){
+      e.preventDefault();
+      if(el.classList.contains('mfs-fake')){exitFake();return;}
+      if(realFS()){(document.exitFullscreen||document.webkitExitFullscreen).call(document);return;}
+      var req=el.requestFullscreen||el.webkitRequestFullscreen;
+      if(req){ try{ var p=req.call(el); if(p&&p.catch)p.catch(function(){el.classList.add('mfs-fake');document.documentElement.classList.add('mfs-lock');setIcon(true);poke();}); }catch(err){el.classList.add('mfs-fake');document.documentElement.classList.add('mfs-lock');setIcon(true);poke();} }
+      else { el.classList.add('mfs-fake');document.documentElement.classList.add('mfs-lock');setIcon(true);poke(); }
+    });
+    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&el.classList.contains('mfs-fake'))exitFake();});
+    ['fullscreenchange','webkitfullscreenchange'].forEach(function(t){document.addEventListener(t,function(){setIcon(realFS()===el);poke();});});
+    el.appendChild(b);
+  }
+  function scan(){
+    var els=document.querySelectorAll('[data-fullscreen-map], .leaflet-container, .maplibregl-map, .mapboxgl-map');
+    els.forEach(function(el){
+      if(el.closest('.mfs-host')&&!el.classList.contains('mfs-host'))return;
+      var r=el.getBoundingClientRect(); if(r.width<200||r.height<150)return;
+      add(el);
+    });
+  }
+  function start(){scan(); var n=0; var t=setInterval(function(){scan(); if(++n>20)clearInterval(t);},500);}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start); else start();
+})();
+</script>
+<!-- /map-fullscreen -->
+
+<script src="https://maps.tristanhotham.com/assets/site-nav.js" defer></script>
+</body>
+</html>
