@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Which way do cricket pitches face?</title>
+<meta name="description" content="{{n.cricket_strip|int}} cricket strips and {{n.other_sports_axis|int}} other pitches from OpenStreetMap, measured: do they follow the old advice to run north to south, out of the low sun?">
+<meta property="og:title" content="Which way do cricket pitches face?">
+<meta property="og:description" content="{{uk.strip.ns20|pc}} of UK cricket strips run within 20° of north to south, against {{uk.football.ns20|pc}} of football pitches. Every pitch measured, on a hand-inked map.">
+<meta property="og:image" content="https://maps.tristanhotham.com/pitch-orientation/header.png">
+<meta property="og:url" content="https://maps.tristanhotham.com/pitch-orientation/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800;9..144,900&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=MedievalSharp&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<style>
+{{CSS}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a class="tb-name" href="#map">Pitch orientation</a>
+  <span class="tb-k">Data study · 2026</span>
+  <nav class="tb-links"><a href="#essay">About</a><button class="theme" id="theme" aria-label="Toggle dark mode">◐</button><a href="https://doi.org/10.5281/zenodo.24075295">Paper</a><a href="{{REPO}}">Data and code</a></nav>
+</div>
+
+<div class="mapband">
+  <div id="map" data-fullscreen-map role="application" aria-label="Hand-inked world map with every measured sports pitch drawn along its axis, and rose diagrams of their directions">
+    <div class="nojs" id="nojs">Loading the map. It needs JavaScript and WebGL.</div>
+    <div class="cartouche" id="cartouche">
+      <button class="ct-toggle" id="ctToggle" aria-expanded="true" title="Show the title">Which way do pitches face? ▾</button>
+      <button class="ct-fold" id="ctFold" title="Fold the title" aria-label="Fold the title">▴</button>
+      <div class="ct-body">
+        <div class="kicker"><b>Data study</b><span>2026</span></div>
+        <h1>Which way do cricket pitches <span class="a">face</span>?</h1>
+        <p class="dek">Every pitch in OpenStreetMap with a measurable length, tinted by how far it turns from north to south. Zoomed out, each rose shows the directions of the pitches in its square. Zoom in to see single pitches, and tap one.</p>
+        <div class="byline">Dr Tristan Hotham · Independent researcher · 2026</div>
+      </div>
+    </div>
+    <div class="ov ov-top">
+      <div class="srch"><input type="search" id="q" placeholder="Find a town or a ground" aria-label="Find a town or a ground" autocomplete="off"><ul class="sug" id="sug" role="listbox"></ul></div>
+      <div class="chips" id="chips"><button class="chip lyr" id="lyrBtn" aria-expanded="false" aria-controls="lp">Layers and filters</button>
+        <button class="chip on" data-go="uk">Britain</button><button class="chip" data-go="aus">Australia</button><button class="chip" data-go="nz">New Zealand</button><button class="chip" data-go="sa">South Asia</button></div>
+    </div>
+    <div class="lp" id="lp" role="dialog" aria-label="Map layers and filters">
+      <h4>Pitches</h4>
+      <div class="note">Sport (UK only, except cricket)</div>
+      <select id="spSel" aria-label="Sport"></select>
+      <label><input type="checkbox" id="roseBox" checked> Rose diagrams (zoomed out)</label>
+      <label><input type="checkbox" id="pitchBox" checked> Single pitches (zoomed in)</label>
+      <label><input type="checkbox" id="osmBox" checked> Pitch outlines from the map tiles</label>
+      <h5>The inked map</h5>
+      <label><input type="checkbox" data-g="mountains" checked> Ink mountains and hills</label>
+      <label><input type="checkbox" data-g="forests" checked> Forests, marsh and moor</label>
+      <label><input type="checkbox" data-g="rivers" checked> Rivers and lakes</label>
+      <label><input type="checkbox" data-g="sea" checked> Sea shading and ripples</label>
+      <label><input type="checkbox" data-g="names" checked> Place names</label>
+      <label><input type="checkbox" data-g="borders" checked> Borders</label>
+      <label><input type="checkbox" data-g="roads" checked> Roads and streets</label>
+      <label><input type="checkbox" data-g="tint" checked> Watercolour tints</label>
+      <label><input type="checkbox" data-g="hillshade"> Hill shading</label>
+      <label><input type="checkbox" id="modern"> Plain modern map, for finding your way</label>
+    </div>
+    <div class="lgd" id="lgd" aria-live="polite">
+      <button class="lgd-t" id="lgdT" aria-expanded="false">Key ▾</button>
+      <div class="lgd-b">
+        <b>Turn from the north to south line</b>
+        <div class="bar" id="lgdBar"></div>
+        <div class="ends"><span>0°</span><span>45°</span><span>90°</span></div>
+        <div class="rw"><canvas id="rose" width="92" height="92" aria-label="Rose diagram of the pitches in view"></canvas>
+          <div class="rs" id="roseTxt"></div></div>
+      </div>
+    </div>
+    <div class="ov-br" id="count" aria-live="polite"></div>
+  </div>
+</div>
+
+<div class="wrap" id="essay">
+{{ESSAY}}
+
+<div class="cta"><a class="p" href="https://doi.org/10.5281/zenodo.24075295">Read the paper</a><a href="{{REPO}}">Data and code</a><a href="https://blog.tristanhotham.com/2026/10/31/pitch-orientation/">Blog post</a></div>
+
+<footer>
+<p>Dr Tristan Hotham, Independent researcher. ORCID <a href="https://orcid.org/0000-0003-4931-9349">0000-0003-4931-9349</a>.</p>
+<p>Cite as: Hotham, T. (2026) Which way do cricket pitches face? Zenodo. <a href="https://doi.org/10.5281/zenodo.24075295">10.5281/zenodo.24075295</a></p>
+<p>Code: <a href="{{REPO}}">github.com/Tristan-Hotham/pitch-orientation</a> (MIT). Text and figures CC BY 4.0; pitch data derived from OpenStreetMap © OpenStreetMap contributors (ODbL).</p>
+<p>{{AI}}</p>
+</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="js/curated.js?v=1"></script>
+<script src="js/ink-palette.js?v=1"></script>
+<script src="js/ink-icons.js?v=1"></script>
+<script src="js/ink-houses.js?v=1"></script>
+<script src="js/ink-map.js?v=1"></script>
+<script src="js/ink-extras.js?v=1"></script>
+<script>
+(function () {
+  const qs = new URLSearchParams(location.search);
+  const opts = { workerConfig: { heritage: '', hills: '', places: '' } };
+  if (qs.get('tj')) opts.tilejson = qs.get('tj');
+  const start = qs.get('at') ? qs.get('at').split(',').map(Number) : null;
+  const phone = matchMedia('(max-width:600px)').matches;
+  const VIEWS = { uk: [[-2.6, 53.4], phone ? 4.6 : 5.4], aus: [[145.5, -33.5], phone ? 3.6 : 4.4], nz: [[173.0, -41.2], phone ? 4.2 : 5.0], sa: [[76.0, 20.0], phone ? 3.4 : 4.2] };
+  opts.mapOptions = start ? { center: [start[1], start[0]], zoom: start[2] } : { center: VIEWS.uk[0], zoom: VIEWS.uk[1] };
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const STOPS = {{NS_STOPS}};
+  const GLARE = {{GLARE}};
+  let D = null, map = null, P = null;
+  const state = { sp: 'strip' };
+  // sport choices: [label, test on class index]
+  const SPORTS = [['strip', 'Cricket strips (single pitches)', [0]], ['nets', 'Cricket practice nets', [3]], ['square', 'Cricket squares (compass only)', [1]], ['ground', 'Cricket grounds (oval)', [2]],
+                  ['tennis', 'Tennis courts', [5]], ['football', 'Football pitches', [4]], ['rugby', 'Rugby pitches', [6]], ['hockey', 'Hockey pitches', [7]],
+                  ['netball', 'Netball courts', [8]], ['basketball', 'Basketball courts', [9]], ['gaelic', 'Gaelic games pitches', [10]], ['all', 'Every sport with an axis', [0, 3, 4, 5, 6, 7, 8, 9, 10]]];
+
+  const ct = $('cartouche');
+  const fold = f => { ct.classList.toggle('folded', f); $('ctToggle').setAttribute('aria-expanded', String(!f)); };
+  if (phone) { fold(true); $('lgd').classList.add('fold'); }
+  $('ctToggle').addEventListener('click', () => fold(!ct.classList.contains('folded')));
+  $('ctFold').addEventListener('click', () => fold(true));
+  $('lgdT').addEventListener('click', () => { const f = $('lgd').classList.toggle('fold'); $('lgdT').setAttribute('aria-expanded', String(!f)); });
+  document.addEventListener('fullscreenchange', () => { if (document.fullscreenElement) fold(true); });
+  function col(a) { a = Math.min(90, Math.abs(a)); for (let i = 1; i < STOPS.length; i++) { if (a <= STOPS[i][0]) { const [a0, c0] = STOPS[i - 1], [a1, c1] = STOPS[i]; const t = (a - a0) / (a1 - a0); const h = c => [1, 3, 5].map(j => parseInt(c.substr(j, 2), 16)); const x = h(c0), y = h(c1); return 'rgb(' + x.map((v, j) => Math.round(v + (y[j] - v) * t)).join(',') + ')'; } } return STOPS[STOPS.length - 1][1]; }
+  (function () { const g = []; for (let k = 0; k <= 20; k++) { const a = k / 20 * 90; g.push(col(a) + ' ' + (k * 5) + '%'); } $('lgdBar').style.background = 'linear-gradient(90deg,' + g.join(',') + ')'; })();
+  const nsd = b => { b = ((b % 180) + 180) % 180; return Math.min(b, 180 - b); };
+
+  const dataP = fetch('data/pitches.json').then(r => r.json());
+  InkMap.create('map', opts).then(m => {
+    map = window.__map = m; window.__popup = (i, ll) => popup(i, ll);
+    $('nojs').remove();
+    const foldAttr = () => { const at = document.querySelector('.maplibregl-ctrl-attrib.maplibregl-compact'); if (at) { at.classList.remove('maplibregl-compact-show'); at.removeAttribute('open'); } };
+    map.once('idle', foldAttr); foldAttr();
+    map.addControl(new maplibregl.NavigationControl({ showCompass: true, visualizePitch: false }), 'bottom-right');
+    if (InkMap.setWinter) InkMap.setWinter(map, false);
+    ['heritage', 'flight', 'animals', 'farms', 'towns'].forEach(g => InkMap.setGroup(map, g, false));
+    const isDark = () => { const r = document.documentElement; return r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; };
+    const tone = () => InkMap.setSeaTone && InkMap.setSeaTone(map, isDark());
+    tone(); new MutationObserver(tone).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    dataP.then(d => { D = d; addPitches(); buildUI(); }).catch(e => console.error('pitches', e));
+    setupLayers();
+  }).catch(e => { console.error(e); const n = $('nojs'); if (n) n.textContent = 'The map could not load: ' + e.message; });
+
+  function firstSymbol() { const ls = map.getStyle().layers; const l = ls.find(x => x.metadata && x.metadata.group === 'names'); return l ? l.id : undefined; }
+  // a pitch glyph: a long rectangle with crease marks, drawn pointing up (north), rotated by the bearing
+  function stripImage() {
+    const W = 16, H = 64, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+    g.fillStyle = '#000'; g.fillRect(3, 2, W - 6, H - 4); g.clearRect(5, 9, W - 10, 2); g.clearRect(5, H - 11, W - 10, 2);
+    return { width: W, height: H, data: g.getImageData(0, 0, W, H).data };
+  }
+  function squareImage() {
+    const W = 40, c = document.createElement('canvas'); c.width = W; c.height = W; const g = c.getContext('2d');
+    g.strokeStyle = '#000'; g.lineWidth = 5; g.strokeRect(5, 5, W - 10, W - 10); g.fillStyle = '#000'; g.fillRect(17, 2, 6, 10);
+    return { width: W, height: W, data: g.getImageData(0, 0, W, W).data };
+  }
+  function ringImage() {
+    const W = 40, c = document.createElement('canvas'); c.width = W; c.height = W; const g = c.getContext('2d');
+    g.strokeStyle = '#000'; g.lineWidth = 5; g.beginPath(); g.ellipse(20, 20, 16, 13, 0, 0, 7); g.stroke();
+    return { width: W, height: W, data: g.getImageData(0, 0, W, W).data };
+  }
+  function addPitches() {
+    const K = D.keys, ix = Object.fromEntries(K.map((k, i) => [k, i]));
+    P = D.rows.map((r, i) => ({ i, lon: r[ix.lon], lat: r[ix.lat], b: r[ix.bearing], L: r[ix.length], Wd: r[ix.width], c: r[ix.cls], k: r[ix.country], n: r[ix.name], osm: r[ix.osm], ax: r[ix.axis], d: 0 }));
+    P.forEach(p => { p.d = p.ax === 2 ? Math.min(p.b % 90, 90 - p.b % 90) : nsd(p.b); });
+    map.addImage('strip', stripImage(), { sdf: true, pixelRatio: 2 });
+    map.addImage('sq', squareImage(), { sdf: true, pixelRatio: 2 });
+    map.addImage('ring', ringImage(), { sdf: true, pixelRatio: 2 });
+    // pitch outlines from the OpenFreeMap tiles (landuse pitch), so the real shape shows when zoomed in
+    try {
+      map.addLayer({ id: 'osm-pitch', type: 'line', source: 'ofm', 'source-layer': 'landuse', minzoom: 14, filter: ['==', ['get', 'class'], 'pitch'],
+        paint: { 'line-color': '#5C7A2E', 'line-width': ['interpolate', ['linear'], ['zoom'], 14, 0.6, 18, 1.6], 'line-opacity': 0.85 } }, firstSymbol());
+    } catch (e) { console.warn('no pitch outlines', e); }
+    const feats = P.map(p => ({ type: 'Feature', id: p.i, geometry: { type: 'Point', coordinates: [p.lon, p.lat] }, properties: { b: p.b, d: Math.round(p.d * 10) / 10, c: p.c, ax: p.ax } }));
+    map.addSource('pt', { type: 'geojson', data: { type: 'FeatureCollection', features: feats }, attribution: 'Pitches: <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> (ODbL)' });
+    const ramp = ['interpolate', ['linear'], ['get', 'd']]; STOPS.forEach(([a, c]) => ramp.push(a, c));
+    map.addLayer({ id: 'pt', type: 'symbol', source: 'pt', minzoom: 8, layout: {
+      'icon-image': ['match', ['get', 'ax'], 1, 'strip', 2, 'sq', 'ring'], 'icon-rotate': ['get', 'b'], 'icon-rotation-alignment': 'map', 'icon-allow-overlap': true, 'icon-ignore-placement': true,
+      'icon-size': ['interpolate', ['linear'], ['zoom'], 8, 0.22, 11, 0.4, 14, 0.62, 17, 0.9], 'symbol-sort-key': ['-', 0, ['get', 'd']] },
+      paint: { 'icon-color': ['case', ['==', ['get', 'ax'], 0], '#6E604E', ramp], 'icon-halo-color': 'rgba(43,33,25,0.55)', 'icon-halo-width': 0.6,
+               'icon-opacity': ['interpolate', ['linear'], ['zoom'], 8, 0, 8.6, 1, 16, 1, 17.5, 0.55] } }, firstSymbol());
+    map.addSource('roses', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+    map.addLayer({ id: 'roses', type: 'symbol', source: 'roses', maxzoom: 8.6, layout: { 'icon-image': ['get', 'img'], 'icon-allow-overlap': true, 'icon-ignore-placement': true,
+      'icon-size': ['interpolate', ['linear'], ['zoom'], 2, ['*', 0.55, ['get', 's']], 5, ['*', 0.8, ['get', 's']], 8, ['get', 's']] }, paint: { 'icon-opacity': ['interpolate', ['linear'], ['zoom'], 7.8, 1, 8.6, 0] } }, firstSymbol());
+    map.on('click', 'pt', e => popup(e.features[0].id, e.lngLat));
+    map.on('click', 'roses', e => { const f = e.features[0]; map.flyTo({ center: f.geometry.coordinates, zoom: Math.min(9.2, map.getZoom() + 2.5), duration: 1000 }); });
+    ['pt', 'roses'].forEach(l => { map.on('mouseenter', l, () => map.getCanvas().style.cursor = 'pointer'); map.on('mouseleave', l, () => map.getCanvas().style.cursor = ''); });
+    map.on('moveend', updateStats);
+    map.on('zoomend', () => { const lv = level(); if (lv !== curLevel) buildRoses(); });
+    applyFilter();
+  }
+  function shown(p) { const s = SPORTS.find(x => x[0] === state.sp); return s[2].includes(p.c); }
+  let curLevel = -1, roseImgs = [];
+  function level() { const z = map.getZoom(); return z < 3.6 ? 0 : z < 5.6 ? 1 : 2; }
+  const CELL = [4, 1, 0.25];
+  function roseCanvas(h, mod90) {
+    const S = 72, c = document.createElement('canvas'); c.width = S; c.height = S; const g = c.getContext('2d'), cx = S / 2, r = S / 2 - 3, mx = Math.max(1, ...h);
+    g.fillStyle = 'rgba(251,245,228,0.82)'; g.strokeStyle = 'rgba(43,33,25,0.55)'; g.lineWidth = 1.2; g.beginPath(); g.arc(cx, cx, r, 0, 7); g.fill(); g.stroke();
+    g.strokeStyle = 'rgba(156,134,86,0.6)'; g.lineWidth = 0.8; g.beginPath(); g.moveTo(cx, cx - r); g.lineTo(cx, cx + r); g.moveTo(cx - r, cx); g.lineTo(cx + r, cx); g.stroke();
+    const nb = h.length, w = 180 / nb;
+    for (let k = 0; k < nb; k++) { const len = (r - 2) * Math.sqrt(h[k] / mx); if (!len) continue;
+      for (const off of [0, 180]) { const t0 = (k * w + off - 90) * Math.PI / 180, t1 = ((k + 1) * w + off - 90) * Math.PI / 180;
+        g.fillStyle = col(mod90 ? Math.min(k * w + w / 2, 90 - (k * w + w / 2) % 90) : nsd(k * w + w / 2)); g.beginPath(); g.moveTo(cx, cx); g.arc(cx, cx, len, t0, t1); g.closePath(); g.fill(); } }
+    return g.getImageData(0, 0, S, S);
+  }
+  function buildRoses() {
+    if (!P) return;
+    curLevel = level(); const cs = CELL[curLevel];
+    roseImgs.forEach(id => { if (map.hasImage(id)) map.removeImage(id); }); roseImgs = [];
+    const cells = new Map(), mod90 = state.sp === 'square';
+    for (const p of P) { if (!shown(p) || p.ax === 0) continue;
+      const key = Math.floor(p.lon / cs) + ',' + Math.floor(p.lat / cs); let c = cells.get(key);
+      if (!c) { c = { h: new Array(18).fill(0), n: 0, x: 0, y: 0 }; cells.set(key, c); }
+      const b = mod90 ? p.b % 90 : p.b % 180; c.h[Math.min(17, Math.floor(b / 10))]++; if (mod90) c.h[Math.min(17, Math.floor((b + 90) / 10))]++; c.n++; c.x += p.lon; c.y += p.lat; }
+    const feats = []; let j = 0; const minN = curLevel === 2 ? 3 : 5;
+    for (const [key, c] of cells) { if (c.n < minN) continue; const id = 'r' + (j++); map.addImage(id, roseCanvas(c.h, mod90), { pixelRatio: 2 }); roseImgs.push(id);
+      feats.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [c.x / c.n, c.y / c.n] }, properties: { img: id, s: Math.min(1.5, 0.55 + Math.sqrt(c.n) / 12), n: c.n } }); }
+    map.getSource('roses').setData({ type: 'FeatureCollection', features: feats });
+  }
+  function popup(i, ll) {
+    const p = P[i], osmT = p.osm[0] === 'w' ? 'way' : 'relation', id = p.osm.slice(1);
+    const nm = p.n || D.classes[p.c];
+    let h = '<b class="t">' + esc(nm) + '</b>' + dial(p) + '<div>' + (p.n ? esc(D.classes[p.c]) + (p.k >= 0 ? ', ' : '') : '') + (p.k >= 0 ? esc(D.countries[p.k]) : '') + '</div>';
+    if (p.ax === 1) h += '<div>Axis ' + p.b.toFixed(0) + '° to ' + ((p.b + 180) % 360).toFixed(0) + '°: <b>' + turnTxt(p.b) + '</b></div>';
+    else if (p.ax === 2) h += '<div>Sides turned ' + p.d.toFixed(0) + '° from the compass. A square holds many strips, so it has no single axis.</div>';
+    else h += '<div>Round or oval: no axis to measure.</div>';
+    h += '<div class="m">Measured ' + p.L + ' m by ' + p.Wd + ' m</div>';
+    if (p.ax === 1 && (p.c === 0 || p.c === 3)) { const g = GLARE[Math.max(-46, Math.min(60, Math.round(p.lat)))]; if (g) { let b = p.b > 90 ? p.b - 180 : p.b; const safe = b >= g[0] && b <= g[1];
+      h += '<div class="m" style="margin-top:4px">' + (safe ? 'Inside' : 'Outside') + ' the glare-free arc for this latitude (' + fmtB(g[0]) + ' to ' + fmtB(g[1]) + '), so the low sun ' + (safe ? 'never lines up with it' : 'can line up with it') + ' in the model.</div>'; } }
+    h += '<div style="margin-top:5px"><a href="https://www.openstreetmap.org/' + osmT + '/' + id + '" target="_blank" rel="noopener">OpenStreetMap ' + osmT + ' ' + id + '</a></div>';
+    const at = ll || [p.lon, p.lat], pt = map.project(at), H = map.getContainer().clientHeight;
+    if (pt.y < H * 0.45 || pt.y > H - 120) map.panTo(at, { offset: [0, H * 0.22], duration: 600 });
+    new maplibregl.Popup({ maxWidth: '300px', anchor: 'bottom' }).setLngLat(at).setHTML(h).addTo(map);
+  }
+  function fmtB(b) { return b === 0 ? 'north' : Math.abs(b) + '° ' + (b < 0 ? 'west' : 'east') + ' of north'; }
+  function turnTxt(b) { const d = nsd(b); if (d < 0.5) return 'north to south'; if (d > 89.5) return 'east to west'; const e = (b % 180 < 90); return d.toFixed(0) + '° ' + (e ? 'east' : 'west') + ' of north'; }
+  function dial(p) {
+    const R = 26, cx = 30, cy = 30, pt = (a, r) => [cx + Math.sin(a * Math.PI / 180) * r, cy - Math.cos(a * Math.PI / 180) * r];
+    let s = '<svg class="dial" width="60" height="60" viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="' + R + '" fill="#F6EED8" stroke="#9C8656"/><text x="30" y="11" font-size="8" text-anchor="middle" fill="#6E604E">N</text>';
+    if (p.ax) { const bs = p.ax === 2 ? [p.b, p.b + 90] : [p.b]; for (const b of bs) { const [x1, y1] = pt(b, R - 3), [x0, y0] = pt(b + 180, R - 3); s += '<line x1="' + x0 + '" y1="' + y0 + '" x2="' + x1 + '" y2="' + y1 + '" stroke="' + col(p.d) + '" stroke-width="' + (p.ax === 2 ? 2 : 4) + '" stroke-linecap="round"/>'; } }
+    return s + '</svg>';
+  }
+  function applyFilter() {
+    if (!map || !map.getLayer('pt')) return;
+    const s = SPORTS.find(x => x[0] === state.sp);
+    map.setFilter('pt', ['in', ['get', 'c'], ['literal', s[2]]]);
+    buildRoses(); updateStats();
+  }
+  function updateStats() {
+    if (!P) return;
+    const b = map.getBounds(), h = new Array(36).fill(0); let n = 0, w20 = 0; const mod90 = state.sp === 'square';
+    for (const p of P) if (shown(p) && p.ax && b.contains([p.lon, p.lat])) { n++; h[Math.min(35, Math.floor((p.b % 180) / 5))]++; if (mod90 ? p.d <= 10 : p.d <= 20) w20++; }
+    drawRose(h);
+    $('roseTxt').innerHTML = '<b>' + (n ? Math.round(100 * w20 / n) : 0) + '%</b>' + (mod90 ? 'within 10° of the compass' : 'within 20° of north to south') + '<br>' + n.toLocaleString('en-GB') + ' in view';
+    $('count').textContent = n.toLocaleString('en-GB') + ' ' + SPORTS.find(x => x[0] === state.sp)[1].toLowerCase() + ' in view';
+  }
+  function drawRose(h) {
+    const cv = $('rose'), g = cv.getContext('2d'), r = 44, cx = 46, cy = 46, mx = Math.max(1, ...h);
+    g.clearRect(0, 0, 92, 92); g.strokeStyle = '#9C8656'; g.lineWidth = 1; g.beginPath(); g.arc(cx, cy, r, 0, 7); g.stroke();
+    g.strokeStyle = '#E2D3AE'; g.beginPath(); g.moveTo(cx, cy - r); g.lineTo(cx, cy + r); g.moveTo(cx - r, cy); g.lineTo(cx + r, cy); g.stroke();
+    for (let k = 0; k < 36; k++) { const a0 = k * 5, len = r * Math.sqrt(h[k] / mx);
+      for (const off of [0, 180]) { const t0 = (a0 + off - 90) * Math.PI / 180, t1 = (a0 + 5 + off - 90) * Math.PI / 180; g.fillStyle = col(nsd(a0 + 2.5)); g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, len, t0, t1); g.closePath(); g.fill(); } }
+    g.fillStyle = '#6E604E'; g.font = '9px IBM Plex Mono, monospace'; g.textAlign = 'center'; g.fillText('N', cx, 9);
+  }
+  function buildUI() {
+    SPORTS.forEach(s => { const o = document.createElement('option'); o.value = s[0]; o.textContent = s[1]; $('spSel').appendChild(o); });
+    $('spSel').value = state.sp;
+    $('spSel').addEventListener('change', e => { state.sp = e.target.value; applyFilter(); });
+    $('roseBox').addEventListener('change', e => map.setLayoutProperty('roses', 'visibility', e.target.checked ? 'visible' : 'none'));
+    $('pitchBox').addEventListener('change', e => map.setLayoutProperty('pt', 'visibility', e.target.checked ? 'visible' : 'none'));
+    $('osmBox').addEventListener('change', e => { if (map.getLayer('osm-pitch')) map.setLayoutProperty('osm-pitch', 'visibility', e.target.checked ? 'visible' : 'none'); });
+    document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => { const v = VIEWS[b.dataset.go]; document.querySelectorAll('[data-go]').forEach(x => x.classList.toggle('on', x === b)); map.flyTo({ center: v[0], zoom: v[1], duration: 1800 }); }));
+    setupSearch();
+  }
+  function setupLayers() {
+    const lp = $('lp'), btn = $('lyrBtn');
+    btn.addEventListener('click', e => { e.stopPropagation(); const o = lp.classList.toggle('open'); btn.setAttribute('aria-expanded', o); });
+    document.addEventListener('click', e => { if (!lp.contains(e.target) && e.target !== btn) { lp.classList.remove('open'); btn.setAttribute('aria-expanded', false); } });
+    const boxes = [...lp.querySelectorAll('input[data-g]')], modern = $('modern');
+    const NAME_LAYERS = map.getStyle().layers.filter(l => l.type === 'symbol' && l.metadata && ['names', 'rivers'].includes(l.metadata.group)).map(l => l.id);
+    const saved = {}; NAME_LAYERS.forEach(id => saved[id] = { c: map.getPaintProperty(id, 'text-color'), h: map.getPaintProperty(id, 'text-halo-color') });
+    function apply() {
+      const m = modern.checked;
+      boxes.forEach(b => { const g = b.dataset.g; const inkOnly = ['mountains', 'forests', 'sea', 'tint'].includes(g); InkMap.setGroup(map, g, b.checked && !(m && inkOnly)); });
+      InkMap.setGroup(map, 'paper', !m); InkMap.setGroup(map, 'modern', m); InkMap.setGroup(map, 'coast', !m);
+      NAME_LAYERS.forEach(id => { map.setPaintProperty(id, 'text-color', m ? '#333333' : saved[id].c); map.setPaintProperty(id, 'text-halo-color', m ? 'rgba(255,255,255,0.9)' : saved[id].h); });
+    }
+    boxes.forEach(b => b.addEventListener('change', apply)); modern.addEventListener('change', apply);
+  }
+  function setupSearch() {
+    const q = $('q'), sug = $('sug');
+    const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    let idx = null, places = null, sel = -1, items = [];
+    fetch('data/places.json').then(r => r.json()).then(p => { places = p.map(x => [norm(x[0]), x]); }).catch(() => {});
+    function show(list) { items = list; sel = -1; sug.innerHTML = list.map((it, k) => '<li role="option" data-k="' + k + '">' + esc(it.t) + ' <span>' + esc(it.s) + '</span></li>').join(''); sug.style.display = list.length ? 'block' : 'none'; }
+    function go(it) {
+      sug.style.display = 'none'; q.value = it.t;
+      if (it.i !== undefined) { const p = P[it.i]; map.flyTo({ center: [p.lon, p.lat], zoom: 16, duration: 1800 }); map.once('moveend', () => popup(it.i)); }
+      else map.flyTo({ center: it.c, zoom: 12, duration: 1800 });
+    }
+    q.addEventListener('input', () => {
+      const v = norm(q.value.trim()); if (v.length < 2) { show([]); return; }
+      if (!idx) idx = P.filter(p => p.n).map(p => [norm(p.n), p.i]);
+      const out = [];
+      if (places) for (const [n, x] of places) { if (n.startsWith(v)) { out.push({ t: x[0], s: x[1], c: [x[2], x[3]] }); if (out.length >= 5) break; } }
+      for (const [n, i] of idx) { if (n.startsWith(v) || (v.length > 3 && n.includes(v))) { const p = P[i]; out.push({ t: p.n, s: D.classes[p.c] + (p.k >= 0 ? ' · ' + D.countries[p.k] : ''), i }); if (out.length >= 14) break; } }
+      show(out);
+    });
+    q.addEventListener('keydown', e => {
+      const lis = [...sug.children];
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); sel = Math.max(0, Math.min(lis.length - 1, sel + (e.key === 'ArrowDown' ? 1 : -1))); lis.forEach((l, k) => l.setAttribute('aria-selected', k === sel)); }
+      else if (e.key === 'Enter' && items.length) { e.preventDefault(); go(items[Math.max(sel, 0)]); }
+      else if (e.key === 'Escape') sug.style.display = 'none';
+    });
+    sug.addEventListener('click', e => { const li = e.target.closest('li'); if (li) go(items[+li.dataset.k]); });
+  }
+  $('theme').addEventListener('click', () => { const r = document.documentElement; const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; r.dataset.theme = dark ? 'light' : 'dark'; });
+})();
+</script>
+{{FULLSCREEN}}
+<script src="https://maps.tristanhotham.com/assets/site-nav.js" defer></script>
+</body>
+</html>
