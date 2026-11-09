@@ -177,9 +177,9 @@ table.words td.r,table.words th.r{text-align:right}
       <div class="note">Sport (UK only, except cricket)</div>
       <select id="spSel" aria-label="Sport"></select>
       <label><input type="checkbox" id="roseBox" checked> Rose diagrams (zoomed out)</label>
-      <label><input type="checkbox" id="dotBox" checked> Dots: where pitches and grounds are mapped</label>
-      <label><input type="checkbox" id="pitchBox" checked> Single pitches (zoomed in)</label>
-      <label><input type="checkbox" id="glowBox" checked> Highlight rings and names of cricket grounds</label>
+      <label><input type="checkbox" id="dotBox" checked> Grounds and venues with no axis (green circles)</label>
+      <label><input type="checkbox" id="pitchBox" checked> Measured pitches, drawn along their axis</label>
+      <label><input type="checkbox" id="glowBox" checked> Rings round measured pitches, and names</label>
       <label><input type="checkbox" id="osmBox" checked> Pitch outlines from the map tiles</label>
       <h5>The inked map</h5>
       <label><input type="checkbox" data-g="mountains" checked> Ink mountains and hills</label>
@@ -191,7 +191,7 @@ table.words td.r,table.words th.r{text-align:right}
       <label><input type="checkbox" data-g="roads" checked> Roads and streets</label>
       <label><input type="checkbox" data-g="tint" checked> Watercolour tints</label>
       <label><input type="checkbox" data-g="hillshade"> Hill shading</label>
-      <label><input type="checkbox" id="modern"> Plain modern map, for finding your way</label>
+      <label><input type="checkbox" id="modern" checked> Plain modern map (faster; untick for the inked map)</label>
     </div>
     <div class="lgd" id="lgd" aria-live="polite">
       <button class="lgd-t" id="lgdT" aria-expanded="false">Key ▾</button>
@@ -201,9 +201,8 @@ table.words td.r,table.words th.r{text-align:right}
         <div class="ends"><span>0°</span><span>45°</span><span>90°</span></div>
         <div class="rw"><canvas id="rose" width="92" height="92" aria-label="Rose diagram of the pitches in view"></canvas>
           <div class="rs" id="roseTxt"></div></div>
-        <div class="kk"><span class="kd" style="background:#A3261B"></span>pitch with an axis, coloured by its turn</div>
-        <div class="kk"><span class="kd" style="background:#1F6B4A"></span>ground, club or venue with no axis</div>
-        <div class="kk"><span class="kd" style="background:rgba(163,38,27,.13);border:1.5px solid rgba(163,38,27,.6);width:12px;height:12px"></span>cricket place, zoomed in</div>
+        <div class="kk"><span class="kd" style="background:#C4471F;border:1px solid #2B2119"></span><span><b>Measured pitch</b>: has an axis. Zoomed in it is drawn along it, in a white ring</span></div>
+        <div class="kk"><span class="kd" style="background:#fff;border:2px solid #2E7D4F"></span><span><b>Ground or venue</b>: location only, no axis to measure</span></div>
       </div>
     </div>
     <div class="ov-br" id="count" aria-live="polite"></div>
@@ -365,21 +364,24 @@ table.words td.r,table.words th.r{text-align:right}
     const feats = P.map(p => ({ type: 'Feature', id: p.i, geometry: { type: 'Point', coordinates: [p.lon, p.lat] }, properties: { b: p.b, d: Math.round(p.d * 10) / 10, c: p.c, ax: p.ax, n: p.n || '', ck: p.c <= 3 || p.c === 12 ? 1 : 0 } }));
     map.addSource('pt', { type: 'geojson', data: { type: 'FeatureCollection', features: feats }, attribution: 'Pitches: <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> (ODbL)' });
     const ramp = ['interpolate', ['linear'], ['get', 'd']]; STOPS.forEach(([a, c]) => ramp.push(a, c));
-    map.addLayer({ id: 'pt', type: 'symbol', source: 'pt', minzoom: 8, layout: {
-      'icon-image': ['match', ['get', 'ax'], 1, 'strip', 2, 'sq', 'ring'], 'icon-rotate': ['get', 'b'], 'icon-rotation-alignment': 'map', 'icon-allow-overlap': true, 'icon-ignore-placement': true,
-      'icon-size': ['interpolate', ['linear'], ['zoom'], 8, ['case', ['==', ['get', 'ax'], 0], 0.36, 0.26], 11, ['case', ['==', ['get', 'ax'], 0], 0.55, 0.42], 14, 0.66, 17, 0.9], 'symbol-sort-key': ['-', 0, ['get', 'd']] },
-      paint: { 'icon-color': ['case', ['==', ['get', 'ax'], 0], ['case', ['==', ['get', 'c'], 12], '#1F6B4A', '#2F7A3A'], ramp], 'icon-halo-color': 'rgba(43,33,25,0.55)', 'icon-halo-width': 0.6,
-               'icon-opacity': ['interpolate', ['linear'], ['zoom'], 8, 0, 8.6, 1, 16, 1, 17.5, 0.55] } }, firstSymbol());
-    // where the data are: small dots at every zoom below the pitch symbols, and a soft halo round cricket places when zoomed in
-    map.addLayer({ id: 'pt-dot', type: 'circle', source: 'pt', maxzoom: 9.5, paint: {
-      'circle-radius': ['interpolate', ['linear'], ['zoom'], 1, 1.3, 4, 2.0, 7, 3.0, 9, 3.6],
-      'circle-color': ['case', ['==', ['get', 'ax'], 0], '#1F6B4A', ['interpolate', ['linear'], ['get', 'd'], 0, '#A3261B', 30, '#C4471F', 60, '#4F6F9A', 90, '#4F6F9A']],
-      'circle-stroke-color': 'rgba(251,245,228,0.95)', 'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 2, 0.4, 8, 1],
-      'circle-opacity': ['interpolate', ['linear'], ['zoom'], 8.6, 0.95, 9.5, 0], 'circle-stroke-opacity': ['interpolate', ['linear'], ['zoom'], 8.6, 0.95, 9.5, 0] } }, 'pt');
-    map.addLayer({ id: 'pt-glow', type: 'circle', source: 'pt', minzoom: 8.6, filter: ['==', ['get', 'ck'], 1], paint: {
-      'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 7, 12, 12, 15, 20, 17, 30], 'circle-color': 'rgba(163,38,27,0.13)',
-      'circle-stroke-color': 'rgba(163,38,27,0.55)', 'circle-stroke-width': 1.2, 'circle-opacity': ['interpolate', ['linear'], ['zoom'], 8.6, 0, 9.3, 1, 16, 1, 17.5, 0.4],
-      'circle-stroke-opacity': ['interpolate', ['linear'], ['zoom'], 8.6, 0, 9.3, 1, 16, 1, 17.5, 0.4] } }, 'pt');
+    const AX = ['!=', ['get', 'ax'], 0], NOAX = ['==', ['get', 'ax'], 0];
+    // 1. grounds and venues with no axis: a small hollow green circle at every zoom (location only)
+    map.addLayer({ id: 'pt-ven', type: 'circle', source: 'pt', filter: NOAX, paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 1, 1.2, 5, 1.8, 9, 3.2, 13, 5, 17, 7],
+      'circle-color': 'rgba(255,255,255,0.85)', 'circle-stroke-color': '#2E7D4F', 'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 2, 0.8, 9, 1.5, 15, 2.2] } }, firstSymbol());
+    // 2. measured pitches with an axis: a solid coloured dot when zoomed out, with a ring round it when zoomed in
+    map.addLayer({ id: 'pt-glow', type: 'circle', source: 'pt', minzoom: 8, filter: AX, paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 6, 12, 11, 15, 16, 18, 22], 'circle-color': 'rgba(255,255,255,0.75)',
+      'circle-stroke-color': '#2B2119', 'circle-stroke-width': 1.4, 'circle-opacity': ['interpolate', ['linear'], ['zoom'], 8, 0, 8.8, 1], 'circle-stroke-opacity': ['interpolate', ['linear'], ['zoom'], 8, 0, 8.8, 1] } }, firstSymbol());
+    map.addLayer({ id: 'pt-dot', type: 'circle', source: 'pt', maxzoom: 9.2, filter: AX, paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 1, 1.8, 4, 2.6, 7, 3.6, 9, 4.2], 'circle-color': ramp,
+      'circle-stroke-color': '#2B2119', 'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 2, 0.5, 8, 1],
+      'circle-opacity': ['interpolate', ['linear'], ['zoom'], 8.4, 1, 9.2, 0], 'circle-stroke-opacity': ['interpolate', ['linear'], ['zoom'], 8.4, 1, 9.2, 0] } }, firstSymbol());
+    // 3. the pitch itself, drawn along its axis, from zoom 8 to the closest zoom, never fading
+    map.addLayer({ id: 'pt', type: 'symbol', source: 'pt', minzoom: 8, filter: AX, layout: {
+      'icon-image': ['match', ['get', 'ax'], 1, 'strip', 'sq'], 'icon-rotate': ['get', 'b'], 'icon-rotation-alignment': 'map', 'icon-allow-overlap': true, 'icon-ignore-placement': true,
+      'icon-size': ['interpolate', ['linear'], ['zoom'], 8, 0.3, 11, 0.42, 14, 0.62, 18, 0.85], 'symbol-sort-key': ['-', 0, ['get', 'd']] },
+      paint: { 'icon-color': ramp, 'icon-halo-color': '#2B2119', 'icon-halo-width': 0.8, 'icon-opacity': ['interpolate', ['linear'], ['zoom'], 8, 0, 8.8, 1] } }, firstSymbol());
     try {
       const nf = map.getStyle().layers.find(l => l.type === 'symbol' && l.layout && l.layout['text-font']);
       map.addLayer({ id: 'pt-lbl', type: 'symbol', source: 'pt', minzoom: 11.5, filter: ['all', ['==', ['get', 'ck'], 1], ['!=', ['get', 'n'], '']], layout: {
@@ -392,7 +394,8 @@ table.words td.r,table.words th.r{text-align:right}
       'icon-size': ['interpolate', ['linear'], ['zoom'], 2, ['*', 0.55, ['get', 's']], 5, ['*', 0.8, ['get', 's']], 8, ['get', 's']] }, paint: { 'icon-opacity': ['interpolate', ['linear'], ['zoom'], 7.8, 1, 8.6, 0] } }, firstSymbol());
     map.on('click', 'pt', e => popup(e.features[0].id, e.lngLat));
     map.on('click', 'pt-dot', e => { const f = e.features[0]; if (map.getZoom() < 7) map.flyTo({ center: f.geometry.coordinates, zoom: 11, duration: 1400 }); else popup(f.id, e.lngLat); });
-    map.on('mouseenter', 'pt-dot', () => map.getCanvas().style.cursor = 'pointer'); map.on('mouseleave', 'pt-dot', () => map.getCanvas().style.cursor = '');
+    ['pt-dot', 'pt-ven', 'pt-glow'].forEach(l => { map.on('mouseenter', l, () => map.getCanvas().style.cursor = 'pointer'); map.on('mouseleave', l, () => map.getCanvas().style.cursor = ''); });
+    map.on('click', 'pt-ven', e => { const f = e.features[0]; if (map.getZoom() < 7) map.flyTo({ center: f.geometry.coordinates, zoom: 11, duration: 1400 }); else popup(f.id, e.lngLat); });
     map.on('click', 'roses', e => { const f = e.features[0]; map.flyTo({ center: f.geometry.coordinates, zoom: Math.min(9.2, map.getZoom() + 2.5), duration: 1000 }); });
     ['pt', 'roses'].forEach(l => { map.on('mouseenter', l, () => map.getCanvas().style.cursor = 'pointer'); map.on('mouseleave', l, () => map.getCanvas().style.cursor = ''); });
     map.on('moveend', updateStats);
@@ -454,7 +457,8 @@ table.words td.r,table.words th.r{text-align:right}
   function applyFilter() {
     if (!map || !map.getLayer('pt')) return;
     const s = SPORTS.find(x => x[0] === state.sp);
-    map.setFilter('pt', ['in', ['get', 'c'], ['literal', s[2]]]); map.setFilter('pt-dot', ['in', ['get', 'c'], ['literal', s[2]]]); map.setFilter('pt-glow', ['all', ['==', ['get', 'ck'], 1], ['in', ['get', 'c'], ['literal', s[2]]]]); if (map.getLayer('pt-lbl')) map.setFilter('pt-lbl', ['all', ['==', ['get', 'ck'], 1], ['!=', ['get', 'n'], ''], ['in', ['get', 'c'], ['literal', s[2]]]]);
+    const IN = ['in', ['get', 'c'], ['literal', s[2]]], AX = ['!=', ['get', 'ax'], 0], NOAX = ['==', ['get', 'ax'], 0];
+    map.setFilter('pt', ['all', AX, IN]); map.setFilter('pt-dot', ['all', AX, IN]); map.setFilter('pt-glow', ['all', AX, IN]); map.setFilter('pt-ven', ['all', NOAX, IN]); if (map.getLayer('pt-lbl')) map.setFilter('pt-lbl', ['all', ['==', ['get', 'ck'], 1], ['!=', ['get', 'n'], ''], ['in', ['get', 'c'], ['literal', s[2]]]]);
     buildRoses(); updateStats();
   }
   function updateStats() {
@@ -479,8 +483,8 @@ table.words td.r,table.words th.r{text-align:right}
     $('spSel').value = state.sp;
     $('spSel').addEventListener('change', e => { state.sp = e.target.value; applyFilter(); });
     $('roseBox').addEventListener('change', e => map.setLayoutProperty('roses', 'visibility', e.target.checked ? 'visible' : 'none'));
-    $('pitchBox').addEventListener('change', e => map.setLayoutProperty('pt', 'visibility', e.target.checked ? 'visible' : 'none'));
-    $('dotBox').addEventListener('change', e => map.setLayoutProperty('pt-dot', 'visibility', e.target.checked ? 'visible' : 'none'));
+    $('pitchBox').addEventListener('change', e => ['pt', 'pt-dot'].forEach(l => map.setLayoutProperty(l, 'visibility', e.target.checked ? 'visible' : 'none')));
+    $('dotBox').addEventListener('change', e => map.setLayoutProperty('pt-ven', 'visibility', e.target.checked ? 'visible' : 'none'));
     $('glowBox').addEventListener('change', e => ['pt-glow', 'pt-lbl'].forEach(l => { if (map.getLayer(l)) map.setLayoutProperty(l, 'visibility', e.target.checked ? 'visible' : 'none'); }));
     $('osmBox').addEventListener('change', e => { if (map.getLayer('osm-pitch')) map.setLayoutProperty('osm-pitch', 'visibility', e.target.checked ? 'visible' : 'none'); });
     document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => { const v = VIEWS[b.dataset.go]; document.querySelectorAll('[data-go]').forEach(x => x.classList.toggle('on', x === b)); map.flyTo({ center: v[0], zoom: v[1], duration: 1800 }); }));
@@ -500,6 +504,7 @@ table.words td.r,table.words th.r{text-align:right}
       NAME_LAYERS.forEach(id => { map.setPaintProperty(id, 'text-color', m ? '#333333' : saved[id].c); map.setPaintProperty(id, 'text-halo-color', m ? 'rgba(255,255,255,0.9)' : saved[id].h); });
     }
     boxes.forEach(b => b.addEventListener('change', apply)); modern.addEventListener('change', apply);
+    apply();
   }
   function setupSearch() {
     const q = $('q'), sug = $('sug');
