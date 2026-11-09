@@ -48,7 +48,9 @@
       <div class="note">Sport (UK only, except cricket)</div>
       <select id="spSel" aria-label="Sport"></select>
       <label><input type="checkbox" id="roseBox" checked> Rose diagrams (zoomed out)</label>
+      <label><input type="checkbox" id="dotBox" checked> Dots: where pitches and grounds are mapped</label>
       <label><input type="checkbox" id="pitchBox" checked> Single pitches (zoomed in)</label>
+      <label><input type="checkbox" id="glowBox" checked> Highlight rings and names of cricket grounds</label>
       <label><input type="checkbox" id="osmBox" checked> Pitch outlines from the map tiles</label>
       <h5>The inked map</h5>
       <label><input type="checkbox" data-g="mountains" checked> Ink mountains and hills</label>
@@ -70,6 +72,9 @@
         <div class="ends"><span>0°</span><span>45°</span><span>90°</span></div>
         <div class="rw"><canvas id="rose" width="92" height="92" aria-label="Rose diagram of the pitches in view"></canvas>
           <div class="rs" id="roseTxt"></div></div>
+        <div class="kk"><span class="kd" style="background:#A3261B"></span>pitch with an axis, coloured by its turn</div>
+        <div class="kk"><span class="kd" style="background:#1F6B4A"></span>ground, club or venue with no axis</div>
+        <div class="kk"><span class="kd" style="background:rgba(163,38,27,.13);border:1.5px solid rgba(163,38,27,.6);width:12px;height:12px"></span>cricket place, zoomed in</div>
       </div>
     </div>
     <div class="ov-br" id="count" aria-live="polite"></div>
@@ -110,9 +115,9 @@
   const STOPS = {{NS_STOPS}};
   const GLARE = {{GLARE}};
   let D = null, map = null, P = null;
-  const state = { sp: 'strip' };
+  const state = { sp: 'cricket' };
   // sport choices: [label, test on class index]
-  const SPORTS = [['strip', 'Cricket strips (single pitches)', [0]], ['nets', 'Cricket practice nets', [3]], ['square', 'Cricket squares (compass only)', [1]], ['ground', 'Cricket grounds (oval)', [2]],
+  const SPORTS = [['cricket', 'All cricket: pitches, grounds and venues', [0, 1, 2, 3, 12]], ['strip', 'Cricket strips (single pitches)', [0]], ['nets', 'Cricket practice nets', [3]], ['square', 'Cricket squares (compass only)', [1]], ['ground', 'Cricket grounds (oval)', [2]], ['venue', 'Other cricket venues (clubs, stadiums, shared pitches)', [12]],
                   ['tennis', 'Tennis courts', [5]], ['football', 'Football pitches', [4]], ['rugby', 'Rugby pitches', [6]], ['hockey', 'Hockey pitches', [7]],
                   ['netball', 'Netball courts', [8]], ['basketball', 'Basketball courts', [9]], ['gaelic', 'Gaelic games pitches', [10]], ['all', 'Every sport with an axis', [0, 3, 4, 5, 6, 7, 8, 9, 10]]];
 
@@ -172,18 +177,37 @@
       map.addLayer({ id: 'osm-pitch', type: 'line', source: 'ofm', 'source-layer': 'landuse', minzoom: 14, filter: ['==', ['get', 'class'], 'pitch'],
         paint: { 'line-color': '#5C7A2E', 'line-width': ['interpolate', ['linear'], ['zoom'], 14, 0.6, 18, 1.6], 'line-opacity': 0.85 } }, firstSymbol());
     } catch (e) { console.warn('no pitch outlines', e); }
-    const feats = P.map(p => ({ type: 'Feature', id: p.i, geometry: { type: 'Point', coordinates: [p.lon, p.lat] }, properties: { b: p.b, d: Math.round(p.d * 10) / 10, c: p.c, ax: p.ax } }));
+    const feats = P.map(p => ({ type: 'Feature', id: p.i, geometry: { type: 'Point', coordinates: [p.lon, p.lat] }, properties: { b: p.b, d: Math.round(p.d * 10) / 10, c: p.c, ax: p.ax, n: p.n || '', ck: p.c <= 3 || p.c === 12 ? 1 : 0 } }));
     map.addSource('pt', { type: 'geojson', data: { type: 'FeatureCollection', features: feats }, attribution: 'Pitches: <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> (ODbL)' });
     const ramp = ['interpolate', ['linear'], ['get', 'd']]; STOPS.forEach(([a, c]) => ramp.push(a, c));
     map.addLayer({ id: 'pt', type: 'symbol', source: 'pt', minzoom: 8, layout: {
       'icon-image': ['match', ['get', 'ax'], 1, 'strip', 2, 'sq', 'ring'], 'icon-rotate': ['get', 'b'], 'icon-rotation-alignment': 'map', 'icon-allow-overlap': true, 'icon-ignore-placement': true,
-      'icon-size': ['interpolate', ['linear'], ['zoom'], 8, 0.22, 11, 0.4, 14, 0.62, 17, 0.9], 'symbol-sort-key': ['-', 0, ['get', 'd']] },
-      paint: { 'icon-color': ['case', ['==', ['get', 'ax'], 0], '#6E604E', ramp], 'icon-halo-color': 'rgba(43,33,25,0.55)', 'icon-halo-width': 0.6,
+      'icon-size': ['interpolate', ['linear'], ['zoom'], 8, ['case', ['==', ['get', 'ax'], 0], 0.36, 0.26], 11, ['case', ['==', ['get', 'ax'], 0], 0.55, 0.42], 14, 0.66, 17, 0.9], 'symbol-sort-key': ['-', 0, ['get', 'd']] },
+      paint: { 'icon-color': ['case', ['==', ['get', 'ax'], 0], ['case', ['==', ['get', 'c'], 12], '#1F6B4A', '#2F7A3A'], ramp], 'icon-halo-color': 'rgba(43,33,25,0.55)', 'icon-halo-width': 0.6,
                'icon-opacity': ['interpolate', ['linear'], ['zoom'], 8, 0, 8.6, 1, 16, 1, 17.5, 0.55] } }, firstSymbol());
+    // where the data are: small dots at every zoom below the pitch symbols, and a soft halo round cricket places when zoomed in
+    map.addLayer({ id: 'pt-dot', type: 'circle', source: 'pt', maxzoom: 9.5, paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 1, 1.3, 4, 2.0, 7, 3.0, 9, 3.6],
+      'circle-color': ['case', ['==', ['get', 'ax'], 0], '#1F6B4A', ['interpolate', ['linear'], ['get', 'd'], 0, '#A3261B', 30, '#C4471F', 60, '#4F6F9A', 90, '#4F6F9A']],
+      'circle-stroke-color': 'rgba(251,245,228,0.95)', 'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 2, 0.4, 8, 1],
+      'circle-opacity': ['interpolate', ['linear'], ['zoom'], 8.6, 0.95, 9.5, 0], 'circle-stroke-opacity': ['interpolate', ['linear'], ['zoom'], 8.6, 0.95, 9.5, 0] } }, 'pt');
+    map.addLayer({ id: 'pt-glow', type: 'circle', source: 'pt', minzoom: 8.6, filter: ['==', ['get', 'ck'], 1], paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 7, 12, 12, 15, 20, 17, 30], 'circle-color': 'rgba(163,38,27,0.13)',
+      'circle-stroke-color': 'rgba(163,38,27,0.55)', 'circle-stroke-width': 1.2, 'circle-opacity': ['interpolate', ['linear'], ['zoom'], 8.6, 0, 9.3, 1, 16, 1, 17.5, 0.4],
+      'circle-stroke-opacity': ['interpolate', ['linear'], ['zoom'], 8.6, 0, 9.3, 1, 16, 1, 17.5, 0.4] } }, 'pt');
+    try {
+      const nf = map.getStyle().layers.find(l => l.type === 'symbol' && l.layout && l.layout['text-font']);
+      map.addLayer({ id: 'pt-lbl', type: 'symbol', source: 'pt', minzoom: 11.5, filter: ['all', ['==', ['get', 'ck'], 1], ['!=', ['get', 'n'], '']], layout: {
+        'text-field': ['get', 'n'], 'text-font': nf ? nf.layout['text-font'] : ['Noto Sans Regular'], 'text-size': ['interpolate', ['linear'], ['zoom'], 11.5, 11, 15, 14],
+        'text-offset': [0, 1.4], 'text-anchor': 'top', 'text-max-width': 9, 'text-optional': true },
+        paint: { 'text-color': '#7A1C12', 'text-halo-color': 'rgba(251,245,228,0.95)', 'text-halo-width': 1.6 } });
+    } catch (e) { console.warn('no labels', e); }
     map.addSource('roses', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
     map.addLayer({ id: 'roses', type: 'symbol', source: 'roses', maxzoom: 8.6, layout: { 'icon-image': ['get', 'img'], 'icon-allow-overlap': true, 'icon-ignore-placement': true,
       'icon-size': ['interpolate', ['linear'], ['zoom'], 2, ['*', 0.55, ['get', 's']], 5, ['*', 0.8, ['get', 's']], 8, ['get', 's']] }, paint: { 'icon-opacity': ['interpolate', ['linear'], ['zoom'], 7.8, 1, 8.6, 0] } }, firstSymbol());
     map.on('click', 'pt', e => popup(e.features[0].id, e.lngLat));
+    map.on('click', 'pt-dot', e => { const f = e.features[0]; if (map.getZoom() < 7) map.flyTo({ center: f.geometry.coordinates, zoom: 11, duration: 1400 }); else popup(f.id, e.lngLat); });
+    map.on('mouseenter', 'pt-dot', () => map.getCanvas().style.cursor = 'pointer'); map.on('mouseleave', 'pt-dot', () => map.getCanvas().style.cursor = '');
     map.on('click', 'roses', e => { const f = e.features[0]; map.flyTo({ center: f.geometry.coordinates, zoom: Math.min(9.2, map.getZoom() + 2.5), duration: 1000 }); });
     ['pt', 'roses'].forEach(l => { map.on('mouseenter', l, () => map.getCanvas().style.cursor = 'pointer'); map.on('mouseleave', l, () => map.getCanvas().style.cursor = ''); });
     map.on('moveend', updateStats);
@@ -219,13 +243,14 @@
     map.getSource('roses').setData({ type: 'FeatureCollection', features: feats });
   }
   function popup(i, ll) {
-    const p = P[i], osmT = p.osm[0] === 'w' ? 'way' : 'relation', id = p.osm.slice(1);
+    const p = P[i], osmT = ({ w: 'way', r: 'relation', n: 'node' })[p.osm[0]], id = p.osm.slice(1);
     const nm = p.n || D.classes[p.c];
     let h = '<b class="t">' + esc(nm) + '</b>' + dial(p) + '<div>' + (p.n ? esc(D.classes[p.c]) + (p.k >= 0 ? ', ' : '') : '') + (p.k >= 0 ? esc(D.countries[p.k]) : '') + '</div>';
     if (p.ax === 1) h += '<div>Axis ' + p.b.toFixed(0) + '° to ' + ((p.b + 180) % 360).toFixed(0) + '°: <b>' + turnTxt(p.b) + '</b></div>';
     else if (p.ax === 2) h += '<div>Sides turned ' + p.d.toFixed(0) + '° from the compass. A square holds many strips, so it has no single axis.</div>';
+    else if (p.c === 12) h += '<div>Mapped in OpenStreetMap as a cricket place (a club, stadium, sports centre or shared pitch) with no cricket pitch outline to measure. Shown to help you find it; not part of the analysis.</div>';
     else h += '<div>Round or oval: no axis to measure.</div>';
-    h += '<div class="m">Measured ' + p.L + ' m by ' + p.Wd + ' m</div>';
+    if (p.L) h += '<div class="m">Measured ' + p.L + ' m by ' + p.Wd + ' m</div>';
     if (p.ax === 1 && (p.c === 0 || p.c === 3)) { const g = GLARE[Math.max(-46, Math.min(60, Math.round(p.lat)))]; if (g) { let b = p.b > 90 ? p.b - 180 : p.b; const safe = b >= g[0] && b <= g[1];
       h += '<div class="m" style="margin-top:4px">' + (safe ? 'Inside' : 'Outside') + ' the glare-free arc for this latitude (' + fmtB(g[0]) + ' to ' + fmtB(g[1]) + '), so the low sun ' + (safe ? 'never lines up with it' : 'can line up with it') + ' in the model.</div>'; } }
     h += '<div style="margin-top:5px"><a href="https://www.openstreetmap.org/' + osmT + '/' + id + '" target="_blank" rel="noopener">OpenStreetMap ' + osmT + ' ' + id + '</a></div>';
@@ -244,16 +269,17 @@
   function applyFilter() {
     if (!map || !map.getLayer('pt')) return;
     const s = SPORTS.find(x => x[0] === state.sp);
-    map.setFilter('pt', ['in', ['get', 'c'], ['literal', s[2]]]);
+    map.setFilter('pt', ['in', ['get', 'c'], ['literal', s[2]]]); map.setFilter('pt-dot', ['in', ['get', 'c'], ['literal', s[2]]]); map.setFilter('pt-glow', ['all', ['==', ['get', 'ck'], 1], ['in', ['get', 'c'], ['literal', s[2]]]]); if (map.getLayer('pt-lbl')) map.setFilter('pt-lbl', ['all', ['==', ['get', 'ck'], 1], ['!=', ['get', 'n'], ''], ['in', ['get', 'c'], ['literal', s[2]]]]);
     buildRoses(); updateStats();
   }
   function updateStats() {
     if (!P) return;
     const b = map.getBounds(), h = new Array(36).fill(0); let n = 0, w20 = 0; const mod90 = state.sp === 'square';
+    let nAll = 0; for (const p of P) if (shown(p) && b.contains([p.lon, p.lat])) nAll++;
     for (const p of P) if (shown(p) && p.ax && b.contains([p.lon, p.lat])) { n++; h[Math.min(35, Math.floor((p.b % 180) / 5))]++; if (mod90 ? p.d <= 10 : p.d <= 20) w20++; }
     drawRose(h);
     $('roseTxt').innerHTML = '<b>' + (n ? Math.round(100 * w20 / n) : 0) + '%</b>' + (mod90 ? 'within 10° of the compass' : 'within 20° of north to south') + '<br>' + n.toLocaleString('en-GB') + ' in view';
-    $('count').textContent = n.toLocaleString('en-GB') + ' ' + SPORTS.find(x => x[0] === state.sp)[1].toLowerCase() + ' in view';
+    $('count').textContent = nAll.toLocaleString('en-GB') + ' in view' + (nAll !== n ? ', ' + n.toLocaleString('en-GB') + ' with an axis' : '') + ' (' + SPORTS.find(x => x[0] === state.sp)[1].split(':')[0].replace(/ \(.*/, '').toLowerCase() + ')';
   }
   function drawRose(h) {
     const cv = $('rose'), g = cv.getContext('2d'), r = 44, cx = 46, cy = 46, mx = Math.max(1, ...h);
@@ -269,6 +295,8 @@
     $('spSel').addEventListener('change', e => { state.sp = e.target.value; applyFilter(); });
     $('roseBox').addEventListener('change', e => map.setLayoutProperty('roses', 'visibility', e.target.checked ? 'visible' : 'none'));
     $('pitchBox').addEventListener('change', e => map.setLayoutProperty('pt', 'visibility', e.target.checked ? 'visible' : 'none'));
+    $('dotBox').addEventListener('change', e => map.setLayoutProperty('pt-dot', 'visibility', e.target.checked ? 'visible' : 'none'));
+    $('glowBox').addEventListener('change', e => ['pt-glow', 'pt-lbl'].forEach(l => { if (map.getLayer(l)) map.setLayoutProperty(l, 'visibility', e.target.checked ? 'visible' : 'none'); }));
     $('osmBox').addEventListener('change', e => { if (map.getLayer('osm-pitch')) map.setLayoutProperty('osm-pitch', 'visibility', e.target.checked ? 'visible' : 'none'); });
     document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => { const v = VIEWS[b.dataset.go]; document.querySelectorAll('[data-go]').forEach(x => x.classList.toggle('on', x === b)); map.flyTo({ center: v[0], zoom: v[1], duration: 1800 }); }));
     setupSearch();

@@ -124,3 +124,6 @@ table.words td.r,table.words th.r{text-align:right}
   .ov-br{display:none}
   h2{font-size:28px}
 }
+
+.lgd .kk{display:flex;align-items:center;gap:7px;margin-top:4px;font-size:11px}
+.lgd .kd{display:inline-block;width:9px;height:9px;border-radius:50%;border:1px solid #FBF5E4;flex:0 0 auto;box-sizing:border-box}

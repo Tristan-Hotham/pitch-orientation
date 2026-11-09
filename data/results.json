@@ -6316,5 +6316,15 @@
   "sheet_nets_1": 10,
   "sheet_sample_2": 60,
   "sheet_doubtful_2": 1
+ },
+ "map_venues": {
+  "added": 5607,
+  "named_grounds": 759,
+  "dropped": {
+   "leisure": 1021,
+   "dup": 13053,
+   "shop": 1,
+   "near": 3606
+  }
  }
 }

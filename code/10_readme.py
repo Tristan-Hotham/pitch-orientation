@@ -34,6 +34,7 @@ Code and data: {REPO}
 | `data/overrides_applied.csv` | Hand overrides (none were needed after the rules; kept for the record). |
 | `data/results.json` | Every number quoted on the page, in the paper, blog, collage and post. |
 | `data/pitches.json`, `data/places.json` | Page data; towns for search (Natural Earth). |
+| `data/cricket_venues.csv` | Map only, not part of the analysis: further cricket places in OpenStreetMap (stadiums, clubs, sports centres, shared pitches) with no cricket pitch outline, from `data/raw/cricket_venues_*.tsv.gz` by `code/05b_venues.py`. ODbL. |
 | other `data/*` files, `js/`, `fonts/` | The Inked World map style, copied from the ink-map study via church-orientation. |
 | `code/` | Numbered scripts, the glare model (`sunmodel.py`), templates, `qa.js`. |
 | `release/` | Paper, blog post and figures, Zenodo files. |
@@ -70,7 +71,7 @@ python3 code/09_release.py     # blog post, Zenodo files
 
 ## Sources and licences
 
-- OpenStreetMap (https://www.openstreetmap.org/), © OpenStreetMap contributors, Open Database Licence. Queried with QLever (University of Freiburg). `data/pitches.csv`, `data/pitches.json`, `data/strip_checks.csv` and `data/street_grid_sample.csv` are derived databases under the ODbL.
+- OpenStreetMap (https://www.openstreetmap.org/), © OpenStreetMap contributors, Open Database Licence. Queried with QLever (University of Freiburg). `data/pitches.csv`, `data/pitches.json`, `data/strip_checks.csv`, `data/street_grid_sample.csv` and `data/cricket_venues.csv` are derived databases under the ODbL.
 - OpenFreeMap vector tiles (OpenMapTiles schema, OpenStreetMap data) for the street grid and the map.
 - Natural Earth (public domain): countries and populated places.
 - Map style: the Inked World (ink-map study, MIT code), with Natural Earth, RESOLVE Ecoregions 2017 (CC BY 4.0), Wikidata (CC0) and AWS Terrain Tiles.
