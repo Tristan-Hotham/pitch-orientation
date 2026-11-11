@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this data or code, please cite it as below."
+title: "Which Way Do Cricket Pitches Face? The Orientation of Sports Pitches in OpenStreetMap, the Low Sun and the Street Grid"
+type: dataset
+authors:
+  - family-names: Hotham
+    given-names: Tristan
+    orcid: "https://orcid.org/0000-0003-4931-9349"
+    affiliation: "Independent researcher"
+doi: "10.5281/zenodo.24075295"
+url: "https://maps.tristanhotham.com/pitch-orientation/"
+repository-code: "https://github.com/Tristan-Hotham/pitch-orientation"
+license: CC-BY-4.0
+keywords:
+  - "sports pitches"
+  - "cricket"
+  - "orientation"
+  - "sun glare"
+  - "OpenStreetMap"
+  - "street networks"
+  - "tennis"
+  - "sports facility design"
